@@ -1032,7 +1032,8 @@ function boardView(t){
 
   // ── Activity feed + status chips ──
   const invLog = (state.inventoryLog || []);
-  const todayLog = invLog.filter(function(e){ return (e.ts||'').slice(0,10) === iso(); });
+  const cutoff = new Date(Date.now() - 24*60*60*1000).toISOString().slice(0,16);
+  const todayLog = invLog.filter(function(e){ return (e.ts||'') >= cutoff; });
 
   // Group by source+time window (2 min = same session)
   const sessions = [];
