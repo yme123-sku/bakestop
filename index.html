@@ -677,6 +677,37 @@ function loadState(){
 
 let state = loadState();
 
+// ── ADMIN PASSWORD PROTECTION ──
+(function(){
+  var PASS = 'bakestop2024';
+  if(sessionStorage.getItem('bakestop_auth') === PASS) return;
+  document.body.innerHTML = '';
+  document.body.style.cssText = 'background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;direction:rtl;';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:16px;padding:32px 28px;width:300px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.1);';
+  box.innerHTML = '<div style="font-size:36px;margin-bottom:8px;">🥐</div>'
+    + '<div style="font-size:20px;font-weight:800;margin-bottom:20px;">קונדיטוריה</div>'
+    + '<input id="__pi" type="password" placeholder="סיסמה" style="width:100%;padding:12px;border:2px solid #e2e6ec;border-radius:8px;font-size:16px;text-align:center;margin-bottom:12px;box-sizing:border-box;outline:none;">'
+    + '<button id="__pb" style="width:100%;padding:12px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">כניסה</button>'
+    + '<div id="__pe" style="color:#dc2626;font-size:12px;margin-top:10px;height:16px;"></div>';
+  document.body.appendChild(box);
+  function tryLogin(){
+    var v = document.getElementById('__pi').value;
+    if(v === PASS){
+      sessionStorage.setItem('bakestop_auth', PASS);
+      location.reload();
+    } else {
+      document.getElementById('__pe').textContent = 'סיסמה שגויה';
+      document.getElementById('__pi').value = '';
+      document.getElementById('__pi').focus();
+    }
+  }
+  document.getElementById('__pb').addEventListener('click', tryLogin);
+  document.getElementById('__pi').addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
+  document.getElementById('__pi').focus();
+  throw new Error('auth');
+})();
+
 // ── Load from Supabase on startup ──
 (async function initFromSupabase(){
   try {
