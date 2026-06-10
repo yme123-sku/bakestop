@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>סוף יום</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Hebrew:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: #faf7f2; color: #2c1810; font-family: 'Noto Serif Hebrew', Georgia, serif; min-height: 100vh; }
+
+#header { background: #2c1810; color: #faf7f2; padding: 16px 16px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(44,24,16,.3); }
+#header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+#title { font-size: 20px; font-weight: 700; }
+#date-label { font-size: 12px; opacity: .6; margin-top: 2px; }
+#header-actions { display: flex; gap: 8px; align-items: center; }
+#alert-badge { background: #e74c3c; color: #fff; border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 700; display: none; }
+
+#tabs { display: flex; }
+.tab-btn { background: transparent; color: rgba(250,247,242,.65); border: none; border-radius: 8px 8px 0 0; padding: 10px 12px; font-size: 13px; font-weight: 400; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.tab-btn.active { background: #faf7f2; color: #2c1810; font-weight: 700; }
+
+#content { padding: 16px 14px; max-width: 680px; margin: 0 auto; }
+.page { display: none; }
+.page.active { display: block; }
+
+#progress-bar { background: #fff; border-radius: 10px; border: 1px solid #e8ddd0; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#progress-track { width: 120px; height: 6px; background: #e8ddd0; border-radius: 3px; overflow: hidden; }
+#progress-fill { height: 100%; background: #c8a96e; border-radius: 3px; transition: width .3s; width: 0%; }
+#progress-text { font-size: 13px; font-weight: 700; margin-right: 10px; }
+
+.filter-bar { display: flex; gap: 6px; margin-bottom: 16px; }
+.filter-btn { flex: 1; padding: 10px; background: #fff; border: 1px solid #e8ddd0; border-radius: 8px; font-family: inherit; font-size: 13px; cursor: pointer; color: #8b6f5e; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.filter-btn.active { background: #2c1810; color: #faf7f2; border-color: #2c1810; }
+
+.cat-group { margin-bottom: 22px; }
+.cat-group.hidden-filter { display: none !important; }
+.cat-header { font-size: 12px; font-weight: 700; color: #8b6f5e; letter-spacing: .08em; margin-bottom: 8px; padding-right: 8px; border-right: 3px solid #c8a96e; }
+
+.product-row { background: #fff; border-radius: 10px; border: 1px solid #e8ddd0; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; transition: background 0.2s, border-color 0.2s; }
+.product-row.hidden-filter { display: none !important; }
+.product-row.red    { background: #fff5f5; border-color: #ffcccc; }
+.product-row.yellow { background: #fffbf0; border-color: #ffe8aa; }
+.product-name { font-size: 15px; font-weight: 500; }
+.product-meta { font-size: 11px; color: #b09080; margin-top: 2px; }
+.product-info { flex: 1; }
+
+.stepper { display: flex; align-items: center; background: #faf7f2; border: 2px solid #e8ddd0; border-radius: 8px; overflow: hidden; }
+.stepper.has-val { border-color: #c8a96e; background: #fffdf8; }
+.qty-input { width: 50px; text-align: center; font-size: 18px; font-weight: 700; font-family: inherit; border: none; background: transparent; color: #2c1810; outline: none; padding: 6px 0; }
+.btn-step { background: #e8ddd0; color: #2c1810; border: none; width: 36px; height: 36px; font-size: 20px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+.btn-step:active { background: #c8a96e; color: white; }
+
+.alert-section { margin-bottom: 20px; }
+.alert-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; font-weight: 700; font-size: 14px; }
+.alert-header.red    { background: #fff0f0; border: 1px solid #ffcccc; }
+.alert-header.yellow { background: #fffbf0; border: 1px solid #ffe8aa; }
+.alert-row { display: flex; justify-content: space-between; align-items: center; border-radius: 10px; padding: 12px 16px; margin-bottom: 6px; }
+.alert-row.red    { background: #fff5f5; border: 1px solid #ffcccc; }
+.alert-row.yellow { background: #fffbf0; border: 1px solid #ffe8aa; }
+.alert-qty { font-size: 22px; font-weight: 800; }
+.alert-qty.red    { color: #c0392b; }
+.alert-qty.yellow { color: #c8991e; }
+.alert-cat { font-size: 12px; margin-top: 2px; }
+.alert-cat.red    { color: #c0392b; }
+.alert-cat.yellow { color: #c8991e; }
+#no-alerts { text-align: center; padding: 60px 20px; color: #8b6f5e; }
+#no-alerts .icon { font-size: 48px; margin-bottom: 12px; }
+#no-alerts .msg  { font-size: 18px; font-weight: 600; }
+#no-alerts .sub  { font-size: 13px; margin-top: 8px; opacity: .7; }
+
+#add-btn { width: 100%; padding: 14px; background: #2c1810; color: #faf7f2; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; margin-bottom: 16px; }
+#add-form { background: #fff; border-radius: 10px; border: 1px solid #c8a96e; padding: 14px; margin-bottom: 16px; display: none; }
+#add-form.open { display: block; }
+#add-form-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 10px; }
+.form-row { display: flex; gap: 10px; }
+.form-col { flex: 1; }
+.form-label { font-size: 12px; color: #8b6f5e; margin-bottom: 4px; }
+.inp { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e8ddd0; font-size: 14px; font-family: inherit; background: #faf7f2; color: #2c1810; outline: none; }
+.form-actions { display: flex; gap: 8px; }
+.save-btn   { flex: 1; padding: 10px; background: #c8a96e; border: none; border-radius: 8px; font-weight: 700; font-family: inherit; font-size: 14px; cursor: pointer; }
+.cancel-btn { padding: 10px 16px; background: #e8ddd0; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; cursor: pointer; }
+
+.setting-row { background: #fff; border-radius: 10px; border: 1px solid #e8ddd0; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.shelf-input { width: 46px; text-align: center; font-size: 14px; font-weight: 700; font-family: inherit; border: 2px solid #e8ddd0; border-radius: 6px; padding: 5px 2px; background: #faf7f2; color: #2c1810; outline: none; }
+.shelf-label { font-size: 11px; color: #b09080; }
+.icon-btn { background: none; border: none; cursor: pointer; font-size: 15px; padding: 4px 6px; border-radius: 6px; opacity: .7; }
+</style>
+
+</head>
+<body>
+
+<div id="header">
+  <div id="header-top">
+    <div>
+      <div id="title">סוף יום</div>
+      <div id="date-label"></div>
+    </div>
+    <div id="header-actions">
+      <div id="alert-badge"></div>
+      <button onclick="printEOD()" style="background:#8b6f5e;color:#faf7f2;border:none;border-radius:8px;padding:8px 10px;font-size:14px;cursor:pointer;font-family:inherit;">🖨</button>
+      <button id="send-btn" onclick="sendEOD()" style="background:#22c55e;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;">📤 שלח לסיכום</button>
+      <span id="sync-status" style="font-size:11px;font-weight:600;color:#15803d;white-space:nowrap;">🟢 מסונכרן</span>
+    </div>
+  </div>
+  <div id="applied-status" style="display:none;font-size:11px;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid;margin:0 0 6px;"></div>
+  <div id="tabs">
+    <button class="tab-btn active" onclick="switchTab('eod',this)">📋 סוף יום</button>
+    <button class="tab-btn" id="tab-alerts"   onclick="switchTab('alerts',this)">🔔 התראות</button>
+    <button class="tab-btn" id="tab-products" onclick="switchTab('products',this)">⚙️ מוצרים</button>
+  </div>
+</div>
+
+<div id="content">
+  <div id="page-eod" class="page active">
+    <div id="progress-bar">
+      <span style="font-size:13px;color:#8b6f5e">הושלם</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="progress-track"><div id="progress-fill"></div></div>
+        <span id="progress-text">0/0</span>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <button id="filter-all" class="filter-btn active" onclick="setEODFilter('all')">👁️ הצג הכל</button>
+      <button id="filter-pending" class="filter-btn" onclick="setEODFilter('pending')">🔍 רק מה שטרם נספר</button>
+    </div>
+    <div id="eod-list"></div>
+  </div>
+  <div id="page-alerts" class="page">
+    <div id="alerts-content"></div>
+  </div>
+  <div id="page-products" class="page">
+    <button id="add-btn" onclick="openAddForm()">+ הוספת מוצר</button>
+    <div id="add-form">
+      <div id="add-form-title">מוצר חדש</div>
+      <div class="form-group">
+        <input class="inp" id="f-name" placeholder="שם המוצר">
+        <select class="inp" id="f-cat"></select>
+        <div class="form-row">
+          <div class="form-col">
+            <div class="form-label">תוקף (ימים)</div>
+            <input class="inp" type="number" id="f-shelf" min="1" max="30" value="2">
+          </div>
+          <div class="form-col">
+            <div class="form-label">אריזה</div>
+            <select class="inp" id="f-pack"></select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="save-btn" onclick="saveProduct()">הוסף</button>
+          <button class="cancel-btn" onclick="closeAddForm()">ביטול</button>
+        </div>
+      </div>
+    </div>
+    <div id="products-list"></div>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://lwmhoanpqrfpqiuwuuxi.supabase.co';
+const SB_KEY = 'sb_publishable_497hKKPETHnosuN2hgIw-g_OB8hbHkB';
+
+// ── OFFLINE-FIRST SYNC ──
+const PENDING_KEY = 'bakery_pending_sync';
+
+function getPendingQueue(){
+  try { return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch(e){ return []; }
+}
+function savePendingQueue(q){
+  localStorage.setItem(PENDING_KEY, JSON.stringify(q));
+}
+function addToPendingQueue(payload){
+  const q = getPendingQueue();
+  // Remove existing entry for same date
+  const filtered = q.filter(function(p){ return p.payload.date !== payload.date; });
+  filtered.push({ createdAt: new Date().toISOString(), payload: payload });
+  savePendingQueue(filtered);
+}
+
+async function sendToSupabase(eodData) {
+  try {
+    const res = await fetch(SB_URL + '/rest/v1/condit_eod', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        id: eodData.date + '_main',
+        date: eodData.date,
+        submitted_at: new Date().toISOString(),
+        entries: eodData.entries
+      })
+    });
+    return res.ok;
+  } catch(e) {
+    console.error('Supabase error:', e);
+    return false;
+  }
+}
+
+async function syncPendingQueue(){
+  const q = getPendingQueue();
+  if(!q.length) return;
+  const remaining = [];
+  for(var i=0; i<q.length; i++){
+    const ok = await sendToSupabase(q[i].payload);
+    if(!ok) remaining.push(q[i]);
+  }
+  savePendingQueue(remaining);
+  updateSyncStatus();
+}
+
+function updateSyncStatus(){
+  const q   = getPendingQueue();
+  const el  = document.getElementById('sync-status');
+  if(!el) return;
+  if(q.length === 0){
+    el.textContent = '🟢 מסונכרן';
+    el.style.color = '#15803d';
+  } else {
+    el.textContent = '🟡 ממתין (' + q.length + ')';
+    el.style.color = '#d97706';
+  }
+}
+
+// Retry every 30 seconds
+setInterval(function(){
+  const q = getPendingQueue();
+  if(q.length > 0) syncPendingQueue();
+}, 30000);
+
+// Also retry when coming back online
+window.addEventListener('online', syncPendingQueue);
+
+const CATEGORIES = ["בחושות","עוגות שמרים","טארטים","כריכים","סלטים","עוגיות","לחמים","שישי בלבד","מאפים"];
+const PACKAGING  = ["יחידה","קופסא",'ק"ג',"כריך","במשקל"];
+
+const DEFAULT_PRODUCTS = [
+  {id:1,name:"תפוז קוקוס",category:"בחושות",shelfDays:5,packaging:"יחידה"},
+  {id:2,name:"גזר",category:"בחושות",shelfDays:5,packaging:"יחידה"},
+  {id:3,name:"שיש",category:"בחושות",shelfDays:7,packaging:"יחידה"},
+  {id:4,name:"פאדג' שוקולד",category:"בחושות",shelfDays:7,packaging:"יחידה"},
+  {id:5,name:"שוקולד חלווה",category:"בחושות",shelfDays:7,packaging:"יחידה"},
+  {id:6,name:"פיסטוק ליים",category:"בחושות",shelfDays:5,packaging:"יחידה"},
+  {id:7,name:"קראנצים שוקולד",category:"עוגות שמרים",shelfDays:5,packaging:"יחידה"},
+  {id:8,name:"חלווה פיסטוק",category:"עוגות שמרים",shelfDays:5,packaging:"יחידה"},
+  {id:9,name:"ריקוטה חמוציות",category:"עוגות שמרים",shelfDays:4,packaging:"יחידה"},
+  {id:10,name:"אגוזים קינמון",category:"עוגות שמרים",shelfDays:5,packaging:"יחידה"},
+  {id:11,name:"פרסבורגר פרג",category:"עוגות שמרים",shelfDays:3,packaging:"יחידה"},
+  {id:12,name:"אפרסקים",category:"טארטים",shelfDays:7,packaging:"יחידה"},
+  {id:13,name:"אגסים",category:"טארטים",shelfDays:7,packaging:"יחידה"},
+  {id:14,name:"תפוחים",category:"טארטים",shelfDays:7,packaging:"יחידה"},
+  {id:15,name:"פלוט קפרזה",category:"כריכים",shelfDays:1,packaging:"יחידה"},
+  {id:16,name:"פלוט קממבר",category:"כריכים",shelfDays:1,packaging:"יחידה"},
+  {id:17,name:"טוסט",category:"כריכים",shelfDays:1,packaging:"יחידה"},
+  {id:18,name:"כריך חנות",category:"כריכים",shelfDays:1,packaging:"כריך"},
+  {id:19,name:"כריכון חנות",category:"כריכים",shelfDays:1,packaging:"כריך"},
+  {id:20,name:"חצי כריך",category:"כריכים",shelfDays:1,packaging:"כריך"},
+  {id:21,name:"יווני",category:"סלטים",shelfDays:1,packaging:"יחידה"},
+  {id:22,name:"טונה",category:"סלטים",shelfDays:1,packaging:"יחידה"},
+  {id:23,name:"פטוש ירוק",category:"סלטים",shelfDays:1,packaging:"יחידה"},
+  {id:24,name:"קינואה",category:"סלטים",shelfDays:1,packaging:"יחידה"},
+  {id:25,name:"ישראלי",category:"סלטים",shelfDays:1,packaging:"יחידה"},
+  {id:26,name:"שוקו פיסטוק",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:27,name:"שוקולד צ'יפס",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:28,name:"חמאה פקאן",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:29,name:"חמאה שקדים",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:30,name:"עוגיות גרנולה",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:31,name:"חמאה ליים",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:32,name:"פרמזן",category:"עוגיות",shelfDays:30,packaging:"יחידה"},
+  {id:34,name:"קרקר טבעוני",category:"עוגיות",shelfDays:14,packaging:"יחידה"},
+  {id:36,name:"בראוניז בקופסא",category:"עוגיות",shelfDays:10,packaging:"קופסא"},
+  {id:37,name:"כדורי שוקולד בקופסא",category:"עוגיות",shelfDays:10,packaging:"קופסא"},
+  {id:38,name:"מיני סופלה",category:"עוגיות",shelfDays:1,packaging:"יחידה"},
+  {id:39,name:"פיננסייר",category:"עוגיות",shelfDays:3,packaging:"יחידה"},
+  {id:40,name:"כוסמין",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:41,name:"שיפון 60%",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:42,name:"שיפון 100%",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:43,name:"דגנים",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:44,name:"אגוזים",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:45,name:"אגוזים צימוקים",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:46,name:"אפריקאי",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:47,name:"פרג",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:48,name:"פיתות",category:"לחמים",shelfDays:1,packaging:"יחידה"},
+  {id:49,name:"לחמניות חלה",category:"לחמים",shelfDays:3,packaging:"יחידה"},
+  {id:50,name:"חלה רגילה",category:"שישי בלבד",shelfDays:1,packaging:"יחידה"},
+  {id:51,name:"חלה עגולה",category:"שישי בלבד",shelfDays:1,packaging:"יחידה"},
+  {id:52,name:"חלה צימוקים",category:"שישי בלבד",shelfDays:1,packaging:"יחידה"},
+  {id:53,name:"חלה ציפוי דגנים",category:"שישי בלבד",shelfDays:1,packaging:"יחידה"},
+  {id:54,name:"חמאה",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:55,name:"שוקולד",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:56,name:"קינמון",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:57,name:"ריקוטה חמוציות",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:58,name:"שקדים",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:59,name:"שקדים שוקולד",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:60,name:"פיסטוק שקדים",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:61,name:"אמסטרדם",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:62,name:"פס מאפה מלוח",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:63,name:"מאפה קיט קט",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:64,name:"רוגלך",category:"מאפים",shelfDays:1,packaging:"במשקל"},
+  {id:65,name:"מיני מאפה שוקולד",category:"מאפים",shelfDays:1,packaging:"במשקל"},
+  {id:66,name:"בורקס",category:"מאפים",shelfDays:1,packaging:"במשקל"},
+  {id:67,name:"צאן",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:68,name:"מקל גבינה",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+  {id:69,name:"פוקצ'ינה",category:"מאפים",shelfDays:1,packaging:"יחידה"},
+];
+
+let products  = JSON.parse(localStorage.getItem("bakery_products_v4") || "null") || DEFAULT_PRODUCTS;
+let entries   = JSON.parse(localStorage.getItem("bakery_entries_v4")  || "{}");
+let editingId = null;
+let currentFilter = 'all';
+
+const todayKey = () => new Date().toISOString().split("T")[0];
+const save = () => {
+  localStorage.setItem("bakery_products_v4", JSON.stringify(products));
+  localStorage.setItem("bakery_entries_v4",  JSON.stringify(entries));
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("date-label").textContent =
+    new Date().toLocaleDateString("he-IL", { weekday:"long", day:"numeric", month:"long" });
+  const fCat  = document.getElementById("f-cat");
+  const fPack = document.getElementById("f-pack");
+  CATEGORIES.forEach(c => fCat.innerHTML  += `<option>${c}</option>`);
+  PACKAGING.forEach(p  => fPack.innerHTML += `<option>${p}</option>`);
+  renderEOD();
+  updateBadges();
+  updateSyncStatus();
+  syncPendingQueue();
+});
+
+function switchTab(name, btn) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + name).classList.add("active");
+  btn.classList.add("active");
+  if (name === "eod")      applyFilterVisibility();
+  if (name === "alerts")   renderAlerts();
+  if (name === "products") renderProducts();
+}
+
+function renderEOD() {
+  const today = todayKey();
+  const tod   = entries[today] || {};
+  const list  = document.getElementById("eod-list");
+  list.innerHTML = "";
+  CATEGORIES.forEach(cat => {
+    const items = products.filter(p => p.category === cat);
+    if (!items.length) return;
+    const group = document.createElement("div");
+    group.className = "cat-group";
+    group.innerHTML = `<div class="cat-header">${cat}</div>`;
+    items.forEach(p => {
+      const qty  = tod[p.id];
+      const hasV = qty !== undefined && qty !== "";
+      const isR  = hasV && qty > 0 && p.shelfDays === 1;
+      const isY  = hasV && qty > 0 && p.shelfDays === 2;
+      const row  = document.createElement("div");
+      row.className = "product-row" + (isR?" red":isY?" yellow":"");
+      row.innerHTML = `
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-meta">${p.shelfDays} ${p.shelfDays===1?"יום":"ימים"} · ${p.packaging}</div>
+        </div>
+        ${isR?'<span class="status-dot">🔴</span>':isY?'<span class="status-dot">🟡</span>':""}
+        <div class="stepper ${hasV&&qty!==""?"has-val":""}">
+          <button type="button" class="btn-step btn-minus" data-id="${p.id}">-</button>
+          <input class="qty-input" type="number" min="0" placeholder="0" inputmode="numeric"
+            value="${hasV?qty:""}" data-id="${p.id}">
+          <button type="button" class="btn-step btn-plus" data-id="${p.id}">+</button>
+        </div>`;
+      group.appendChild(row);
+    });
+    list.appendChild(group);
+  });
+
+  list.querySelectorAll(".qty-input").forEach(inp => {
+    inp.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const all     = Array.from(list.querySelectorAll(".qty-input"));
+        const visible = all.filter(i => !i.closest('.product-row').classList.contains('hidden-filter'));
+        const idx     = visible.indexOf(this);
+        if (idx > -1 && idx < visible.length-1) { visible[idx+1].focus(); visible[idx+1].select(); }
+        else this.blur();
+      }
+    });
+    inp.addEventListener("input", function() { updateSingleEntry(this.dataset.id, this.value); });
+    inp.addEventListener("focus", function() { setTimeout(()=>this.select(), 50); });
+  });
+
+  list.querySelectorAll(".btn-minus").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const inp = list.querySelector(`.qty-input[data-id="${this.dataset.id}"]`);
+      const val = inp.value===""?0:Number(inp.value);
+      if (val>0){ inp.value=val-1; updateSingleEntry(this.dataset.id, inp.value); }
+    });
+  });
+  list.querySelectorAll(".btn-plus").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const inp = list.querySelector(`.qty-input[data-id="${this.dataset.id}"]`);
+      inp.value = (inp.value===""?0:Number(inp.value))+1;
+      updateSingleEntry(this.dataset.id, inp.value);
+    });
+  });
+  updateProgress(); updateBadges(); applyFilterVisibility();
+}
+
+function updateSingleEntry(id, val) {
+  const today = todayKey();
+  const numId = Number(id);
+  if (!entries[today]) entries[today] = {};
+  entries[today][numId] = val===""?"":Number(val);
+  save();
+  const list    = document.getElementById("eod-list");
+  const inp     = list.querySelector(`.qty-input[data-id="${id}"]`);
+  const stepper = inp.closest(".stepper");
+  stepper.classList.toggle("has-val", val!=="");
+  const p   = products.find(x=>x.id===numId);
+  const qty = Number(val);
+  const row = inp.closest(".product-row");
+  row.classList.remove("red","yellow");
+  const dot = row.querySelector(".status-dot");
+  if (dot) dot.remove();
+  if (val!==""&&qty>0) {
+    if (p.shelfDays===1){ row.classList.add("red"); row.insertBefore(Object.assign(document.createElement("span"),{className:"status-dot",textContent:"🔴"}),stepper); }
+    if (p.shelfDays===2){ row.classList.add("yellow"); row.insertBefore(Object.assign(document.createElement("span"),{className:"status-dot",textContent:"🟡"}),stepper); }
+  }
+  updateProgress(); updateBadges();
+}
+
+function setEODFilter(type) {
+  currentFilter = type;
+  document.getElementById("filter-all").classList.toggle("active", type==='all');
+  document.getElementById("filter-pending").classList.toggle("active", type==='pending');
+  applyFilterVisibility();
+}
+
+function applyFilterVisibility() {
+  const tod = entries[todayKey()]||{};
+  document.querySelectorAll("#eod-list .cat-group").forEach(group => {
+    let vis = 0;
+    group.querySelectorAll(".product-row").forEach(row => {
+      const id     = Number(row.querySelector(".qty-input").dataset.id);
+      const hasVal = tod[id]!==undefined && tod[id]!=="";
+      if (currentFilter==='pending'&&hasVal) row.classList.add("hidden-filter");
+      else { row.classList.remove("hidden-filter"); vis++; }
+    });
+    if (currentFilter==='pending'&&vis===0) group.classList.add("hidden-filter");
+    else group.classList.remove("hidden-filter");
+  });
+}
+
+function updateProgress() {
+  const tod    = entries[todayKey()]||{};
+  const filled = products.filter(p=>tod[p.id]!==undefined&&tod[p.id]!=="").length;
+  document.getElementById("progress-fill").style.width=(products.length?filled/products.length*100:0)+"%";
+  document.getElementById("progress-text").textContent=filled+"/"+products.length;
+}
+
+function updateBadges() {
+  const tod    = entries[todayKey()]||{};
+  const alerts = products.filter(p=>tod[p.id]>0&&p.shelfDays===1).length;
+  const warns  = products.filter(p=>tod[p.id]>0&&p.shelfDays===2).length;
+  const badge  = document.getElementById("alert-badge");
+  badge.style.display = alerts>0?"block":"none";
+  badge.textContent   = `⚠️ ${alerts} פגים מחר`;
+  document.getElementById("tab-alerts").textContent   = `🔔 התראות${alerts+warns>0?` (${alerts+warns})`:""}`;
+  document.getElementById("tab-products").textContent = `⚙️ מוצרים (${products.length})`;
+}
+
+function renderAlerts() {
+  const tod    = entries[todayKey()]||{};
+  const alerts = products.filter(p=>tod[p.id]>0&&p.shelfDays===1);
+  const warns  = products.filter(p=>tod[p.id]>0&&p.shelfDays===2);
+  const el     = document.getElementById("alerts-content");
+  if (!alerts.length&&!warns.length){ el.innerHTML=`<div id="no-alerts"><div class="icon">✅</div><div class="msg">אין התראות</div><div class="sub">מלא את טופס סוף היום כדי לראות התראות</div></div>`; return; }
+  let html="";
+  if (alerts.length){ html+=`<div class="alert-section"><div class="alert-header red"><span style="font-size:18px">🔴</span> פגים מחר — חייבים למכור היום</div>`; alerts.forEach(p=>{ html+=`<div class="alert-row red"><div><div style="font-weight:600;font-size:15px">${p.name}</div><div class="alert-cat red">${p.category}</div></div><div class="alert-qty red">${tod[p.id]} ${p.packaging}</div></div>`; }); html+=`</div>`; }
+  if (warns.length){ html+=`<div class="alert-section"><div class="alert-header yellow"><span style="font-size:18px">🟡</span> פגים מחרתיים</div>`; warns.forEach(p=>{ html+=`<div class="alert-row yellow"><div><div style="font-weight:600;font-size:15px">${p.name}</div><div class="alert-cat yellow">${p.category}</div></div><div class="alert-qty yellow">${tod[p.id]} ${p.packaging}</div></div>`; }); html+=`</div>`; }
+  el.innerHTML=html;
+}
+
+function renderProducts() {
+  const el=document.getElementById("products-list"); el.innerHTML="";
+  CATEGORIES.forEach(cat=>{
+    const items=products.filter(p=>p.category===cat); if(!items.length)return;
+    const group=document.createElement("div"); group.className="cat-group";
+    group.innerHTML=`<div class="cat-header">${cat} (${items.length})</div>`;
+    items.forEach(p=>{ const row=document.createElement("div"); row.className="setting-row"; row.innerHTML=`<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name}</div><div style="font-size:11px;color:#b09080;margin-top:2px">${p.packaging}</div></div><input class="shelf-input" type="number" min="1" max="30" value="${p.shelfDays}" data-id="${p.id}"><span class="shelf-label">ימים</span><button class="icon-btn" onclick="startEdit(${p.id})">✏️</button><button class="icon-btn" onclick="deleteProduct(${p.id})">🗑️</button>`; group.appendChild(row); });
+    el.appendChild(group);
+  });
+  el.querySelectorAll(".shelf-input").forEach(inp=>{ inp.addEventListener("change",function(){ const id=Number(this.dataset.id),val=Math.max(1,Number(this.value)); this.value=val; products=products.map(p=>p.id===id?{...p,shelfDays:val}:p); save(); }); });
+}
+
+function openAddForm(){ editingId=null; document.getElementById("add-form-title").textContent="מוצר חדש"; document.getElementById("f-name").value=""; document.getElementById("f-cat").value="בחושות"; document.getElementById("f-shelf").value=2; document.getElementById("f-pack").value="יחידה"; document.querySelector(".save-btn").textContent="הוסף"; document.getElementById("add-form").classList.add("open"); }
+function closeAddForm(){ document.getElementById("add-form").classList.remove("open"); editingId=null; }
+function startEdit(id){ const p=products.find(x=>x.id===id); editingId=id; document.getElementById("add-form-title").textContent="עריכת מוצר"; document.getElementById("f-name").value=p.name; document.getElementById("f-cat").value=p.category; document.getElementById("f-shelf").value=p.shelfDays; document.getElementById("f-pack").value=p.packaging; document.querySelector(".save-btn").textContent="שמור"; document.getElementById("add-form").classList.add("open"); document.getElementById("add-form").scrollIntoView({behavior:"smooth"}); }
+function saveProduct(){ const name=document.getElementById("f-name").value.trim(); if(!name)return; const obj={name,category:document.getElementById("f-cat").value,shelfDays:Number(document.getElementById("f-shelf").value),packaging:document.getElementById("f-pack").value}; if(editingId!==null){ products=products.map(p=>p.id===editingId?{...obj,id:editingId}:p); }else{ const id=Math.max(0,...products.map(p=>p.id))+1; products.push({...obj,id}); } save(); closeAddForm(); renderProducts(); updateBadges(); }
+function deleteProduct(id){ if(!confirm("למחוק את המוצר?"))return; products=products.filter(p=>p.id!==id); save(); renderProducts(); renderEOD(); }
+
+async function sendEOD() {
+  const today      = todayKey();
+  const yesterday  = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const yKey       = yesterday.toISOString().split('T')[0];
+  const todData    = entries[today]  || {};
+  const yestData   = entries[yKey]   || {};
+  const todFilled  = Object.values(todData).filter(v=>v!=='').length;
+  const yestFilled = Object.values(yestData).filter(v=>v!=='').length;
+
+  let useDate = today;
+  let useData = todData;
+  if (todFilled === 0 && yestFilled > 0) {
+    if (!confirm('אין נתונים להיום.\nנמצאו נתונים מאתמול ('+yKey+') — '+yestFilled+' מוצרים.\nלשלוח את הנתונים של אתמול?')) return;
+    useDate = yKey;
+    useData = yestData;
+  } else if (todFilled === 0) {
+    alert('לא הוזנו נתונים');
+    return;
+  }
+
+  const btn        = document.getElementById('send-btn');
+  const eodEntries = products.map(p=>({ id:p.id, name:p.name, category:p.category, qty:useData[p.id]!==undefined&&useData[p.id]!==''?Number(useData[p.id]):0, shelfDays:p.shelfDays, packaging:p.packaging }));
+  const payload    = { date:useDate, entries:eodEntries };
+
+  btn.textContent='⏳ שולח...'; btn.disabled=true;
+
+  // Save locally first — never lose data
+  addToPendingQueue(payload);
+  updateSyncStatus();
+
+  const ok = await sendToSupabase(payload);
+  if(ok){
+    savePendingQueue(getPendingQueue().filter(function(p){ return p.payload.date !== useDate; }));
+    updateSyncStatus();
+    btn.textContent='✓ נשלח!'; btn.style.background='#15803d';
+    // Start polling for admin confirmation
+    startAppliedPolling(useDate);
+  } else {
+    btn.textContent='🟡 שמור — ישלח כשיהיה חיבור'; btn.style.background='#d97706';
+  }
+  btn.disabled=false;
+  setTimeout(()=>{ btn.textContent='📤 שלח לסיכום'; btn.style.background='#22c55e'; },3000);
+}
+
+var _appliedPollInterval = null;
+
+function startAppliedPolling(date){
+  if(_appliedPollInterval) clearInterval(_appliedPollInterval);
+  updateAppliedStatus(date);
+  _appliedPollInterval = setInterval(function(){ updateAppliedStatus(date); }, 30000);
+}
+
+async function updateAppliedStatus(date){
+  var el = document.getElementById('applied-status');
+  if(!el) return;
+  try {
+    var eodId = date + '_main';
+    var res = await fetch(SB_URL + '/rest/v1/condit_eod?id=eq.'+encodeURIComponent(eodId)+'&select=applied_at', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    var rows = await res.json();
+    if(rows && rows.length && rows[0].applied_at){
+      var t = rows[0].applied_at.slice(11,16);
+      el.textContent = '✅ אדמין עדכן מלאי · ' + t;
+      el.style.color = '#15803d';
+      el.style.background = '#f0fdf4';
+      el.style.borderColor = '#bbf7d0';
+      if(_appliedPollInterval){ clearInterval(_appliedPollInterval); _appliedPollInterval=null; }
+    } else {
+      el.textContent = '⏳ ממתין לאישור אדמין...';
+      el.style.color = '#b45309';
+      el.style.background = '#fffbeb';
+      el.style.borderColor = '#fde68a';
+    }
+    el.style.display = 'flex';
+  } catch(e) {
+    el.style.display = 'none';
+  }
+}
+
+function printEOD() {
+  const today = todayKey();
+  const tod   = entries[today] || {};
+
+  const rows = products.map(p => {
+    const qty = tod[p.id]!==undefined && tod[p.id]!=='' ? tod[p.id] : '—';
+    const clr = qty!=='—' ? '#2c1810' : '#ccc';
+    return '<tr>'
+      +'<td style="padding:6px 10px;border-bottom:1px solid #e8ddd0">'+p.name+'</td>'
+      +'<td style="padding:6px 10px;border-bottom:1px solid #e8ddd0;text-align:center;color:#8b6f5e;font-size:12px">'+p.category+'</td>'
+      +'<td style="padding:6px 10px;border-bottom:1px solid #e8ddd0;text-align:center;font-weight:800;color:'+clr+'">'+qty+'</td>'
+      +"<td style='padding:6px 10px;border-bottom:1px solid #e8ddd0;text-align:center;font-size:12px'>"+p.shelfDays+" י'</td>"
+      +'<td style="padding:6px 10px;border-bottom:1px solid #e8ddd0;text-align:center;font-size:12px">'+p.packaging+'</td>'
+      +'</tr>';
+  }).join('');
+
+  const printTime = new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+
+  // Save original body
+  const origBody = document.body.innerHTML;
+  const origTitle = document.title;
+
+  // Replace body with print content
+  document.title = 'סוף יום ' + today;
+  document.body.innerHTML = `
+    <div style="font-family:Arial,sans-serif;direction:rtl;padding:20px;color:#2c1810;">
+      <h2 style="font-size:18px;margin-bottom:2px;">דוח סוף יום — קונדיטוריה</h2>
+      <p style="font-size:12px;color:#8b6f5e;margin-bottom:14px;">${today} · ${printTime}</p>
+      <button onclick="restoreEOD()" style="margin-bottom:14px;padding:8px 16px;cursor:pointer;background:#e5e7eb;border:none;border-radius:6px;font-weight:700;font-family:Arial;">← חזור</button>
+      <button onclick="window.print()" style="margin-bottom:14px;margin-right:8px;padding:8px 16px;cursor:pointer;background:#c8a96e;border:none;border-radius:6px;font-weight:700;font-family:Arial;color:#fff;">הדפס</button>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr>
+          <th style="text-align:right;padding:8px 10px;background:#f5f0e8;font-size:12px;border-bottom:2px solid #c8a96e;">מוצר</th>
+          <th style="width:100px;text-align:center;padding:8px 10px;background:#f5f0e8;font-size:12px;border-bottom:2px solid #c8a96e;">קטגוריה</th>
+          <th style="width:70px;text-align:center;padding:8px 10px;background:#f5f0e8;font-size:12px;border-bottom:2px solid #c8a96e;">נשאר</th>
+          <th style="width:60px;text-align:center;padding:8px 10px;background:#f5f0e8;font-size:12px;border-bottom:2px solid #c8a96e;">תוקף</th>
+          <th style="width:70px;text-align:center;padding:8px 10px;background:#f5f0e8;font-size:12px;border-bottom:2px solid #c8a96e;">אריזה</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <style>@media print{button{display:none!important}}</style>`;
+
+  // Store original for restore
+  window._eodOrigBody = origBody;
+  window._eodOrigTitle = origTitle;
+}
+
+function restoreEOD(){
+  if(window._eodOrigBody){
+    document.body.innerHTML = window._eodOrigBody;
+    document.title = window._eodOrigTitle || 'סוף יום';
+  }
+}
+
+
+
+</script>
+</body>
+</html>
