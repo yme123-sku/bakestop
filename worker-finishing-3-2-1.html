@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>גימור — יצא מהמלאי</title>
+<style>
+:root{
+  --bg:#f0f2f5;
+  --surface:#fff;
+  --border:#e4e8ee;
+  --text:#111827;
+  --muted:#6b7688;
+  --primary:#2563eb;
+  --primary-soft:#eff6ff;
+  --primary-border:#bfdbfe;
+  --success:#15803d;
+  --success-soft:#f0fdf4;
+  --success-border:#bbf7d0;
+  --danger:#dc2626;
+  --danger-soft:#fff5f5;
+  --warning:#b45309;
+  --warning-soft:#fffbeb;
+  --warning-border:#fde68a;
+  --radius:13px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg)}
+body{font-family:'Segoe UI',system-ui,Arial,sans-serif;direction:rtl;color:var(--text);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;outline:none}
+
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* LOGIN */
+#screen-login{
+  align-items:center;justify-content:center;padding:32px 24px;
+  background:linear-gradient(160deg,#064e3b,#059669)
+}
+.login-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+.login-sub{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:32px;text-align:center}
+.login-input{
+  width:100%;max-width:320px;background:rgba(255,255,255,.15);
+  border:2px solid rgba(255,255,255,.3);border-radius:var(--radius);
+  padding:15px 18px;font-size:20px;font-weight:700;color:#fff;
+  text-align:center;margin-bottom:12px
+}
+.login-input::placeholder{color:rgba(255,255,255,.4)}
+.login-go{
+  width:100%;max-width:320px;background:#fff;color:#059669;
+  border:none;border-radius:var(--radius);padding:15px;
+  font-size:17px;font-weight:800;cursor:pointer
+}
+
+/* MAIN */
+#screen-main{background:var(--bg)}
+.top-bar{
+  position:sticky;top:0;z-index:10;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:12px 16px;box-shadow:0 1px 6px rgba(0,0,0,.07)
+}
+.top-row{display:flex;justify-content:space-between;align-items:center}
+.top-name{font-size:17px;font-weight:800}
+.top-date{font-size:11px;color:var(--muted);margin-top:1px}
+.top-change{font-size:12px;color:#059669;cursor:pointer;font-weight:600}
+
+.content{flex:1;padding:12px 12px 110px}
+
+/* SECTION */
+.cat-block{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:10px;
+  overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.06)
+}
+.cat-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;border-bottom:1px solid var(--border);background:var(--bg)
+}
+.cat-name{font-size:13px;font-weight:800;color:var(--text)}
+.cat-count{font-size:12px;font-weight:700;color:var(--success);
+  background:var(--success-soft);border:1px solid var(--success-border);
+  border-radius:999px;padding:2px 9px}
+
+/* PRODUCT ROW */
+.prod-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--border);
+  transition:background .1s
+}
+.prod-row:last-child{border-bottom:none}
+.prod-row.has-qty{background:var(--success-soft)}
+.prod-label{flex:1;min-width:0}
+.prod-name{font-size:15px;font-weight:600;color:var(--text)}
+.prod-dest{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* QTY CONTROLS */
+.qty-ctrl{display:flex;align-items:center;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;overflow:hidden}
+.prod-row.has-qty .qty-ctrl{border-color:var(--success-border);background:var(--success-soft)}
+.qty-btn{width:40px;height:40px;border:none;background:none;font-size:20px;font-weight:300;color:var(--muted);cursor:pointer}
+.qty-btn:active{background:var(--success);color:#fff}
+.qty-btn.ten{padding:0 8px;width:auto;font-size:12px;font-weight:800}
+.qty-val{min-width:44px;text-align:center;font-size:17px;font-weight:800;color:var(--muted)}
+.prod-row.has-qty .qty-val{color:var(--success)}
+
+/* DESTINATION */
+.dest-select{
+  font-size:11px;font-weight:700;border:1.5px solid var(--border);
+  border-radius:8px;padding:5px 8px;background:var(--bg);
+  color:var(--muted);cursor:pointer;flex-shrink:0;max-width:90px
+}
+.prod-row.has-qty .dest-select{border-color:var(--success-border);background:var(--success-soft);color:var(--success)}
+
+/* SUBMIT BAR */
+.submit-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:10px 16px 26px;box-shadow:0 -4px 16px rgba(0,0,0,.08)
+}
+.submit-summary{font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px;font-weight:600}
+.submit-summary b{color:var(--success)}
+.submit-btn{
+  width:100%;padding:15px;background:#059669;color:#fff;
+  border:none;border-radius:var(--radius);font-size:17px;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 18px rgba(5,150,105,.3)
+}
+.submit-btn:disabled{background:#94a3b8;box-shadow:none}
+
+/* DONE */
+#screen-done{
+  align-items:center;justify-content:center;padding:32px 24px;
+  background:linear-gradient(160deg,#064e3b,#059669)
+}
+.done-icon{font-size:72px;margin-bottom:14px;animation:pop .4s ease}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.done-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:6px}
+.done-sub{font-size:13px;color:rgba(255,255,255,.75);margin-bottom:24px;text-align:center}
+.done-list{
+  width:100%;max-width:340px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);
+  padding:14px;margin-bottom:24px
+}
+.done-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12);color:#fff;font-size:13px
+}
+.done-item:last-child{border-bottom:none}
+.done-item-qty{font-weight:800}
+.done-again{
+  background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;border-radius:var(--radius);padding:13px 28px;
+  font-size:15px;font-weight:700;cursor:pointer
+}
+
+.loading{
+  position:fixed;inset:0;background:rgba(255,255,255,.88);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px
+}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:#059669;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="screen-login" class="screen active">
+  <div class="login-title">✂️ גימור — יצא מהמלאי</div>
+  <div class="login-sub" id="login-date"></div>
+  <input class="login-input" id="login-name" type="text" placeholder="שם..." autocomplete="off" autocorrect="off">
+  <button class="login-go" id="login-go">התחל ›</button>
+</div>
+
+<div id="screen-main" class="screen">
+  <div class="top-bar">
+    <div class="top-row">
+      <div>
+        <div class="top-date" id="top-date"></div>
+        <div class="top-name" id="top-name"></div>
+      <div id="fin-sync-status" style="font-size:10px;font-weight:700;margin-top:3px;padding:2px 8px;border-radius:10px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;display:inline-block;"></div>
+      </div>
+      <div class="top-change" id="btn-change">החלף ›</div>
+    </div>
+  </div>
+  <div class="content" id="main-content"></div>
+  <div class="submit-bar">
+    <button onclick="showAddCatModal()"
+      style="width:100%;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">
+      + קטגוריה חדשה
+    </button>
+    <div class="submit-summary" id="submit-summary">מלא מה יצא היום</div>
+    <button class="submit-btn" id="submit-btn" disabled>שלח דוח ✓</button>
+  </div>
+</div>
+
+<div id="screen-done" class="screen">
+  <div class="done-icon">✅</div>
+  <div class="done-title">נשלח!</div>
+  <div class="done-sub" id="done-sub"></div>
+  <div class="done-list" id="done-list"></div>
+  <button class="done-again" id="btn-again">דוח נוסף</button>
+</div>
+
+<div class="loading" id="loading" style="display:none">
+  <div class="spinner"></div>
+</div>
+
+<script>
+const SB_URL = 'https://lwmhoanpqrfpqiuwuuxi.supabase.co';
+const SB_KEY = 'sb_publishable_497hKKPETHnosuN2hgIw-g_OB8hbHkB';
+
+function submitLogId(){
+  var now = new Date();
+  var hh  = now.getHours().toString().padStart(2,'0');
+  var mm  = now.getMinutes().toString().padStart(2,'0');
+  var ss  = now.getSeconds().toString().padStart(2,'0');
+  var dd  = now.toISOString().slice(2,10).replace(/-/g,'');
+  return 'FINISH-'+dd+'-'+hh+mm+ss;
+}
+
+const DESTINATIONS = ['חנות','הזמנה','פח'];
+
+let workerName = '';
+let products   = [];
+let quantities = {}; // name → qty
+let destMap    = {}; // name → destination
+
+function nowDate(){
+  return new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+}
+function isoDate(){
+  return new Date().toISOString().slice(0,10);
+}
+function showLoading(v){ document.getElementById('loading').style.display = v?'flex':'none'; }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function esc(s){ return (s||'').replace(/[^א-תa-zA-Z0-9]/g,'_'); }
+function deesc(s){ return s.replace(/_/g,' '); }
+
+// ── LOAD ──
+async function loadProducts(){
+  try{
+    const res  = await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main&select=data',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const rows = await res.json();
+    if(rows&&rows[0]&&rows[0].data&&Array.isArray(rows[0].data.products)){
+      const prods = rows[0].data.products.filter(p=>p.type!=='base');
+      try{ localStorage.setItem('finishing_products_v1', JSON.stringify(prods)); }catch(e){}
+      return prods;
+    }
+  }catch(e){}
+  // Fallback to localStorage
+  try{
+    const lp = JSON.parse(localStorage.getItem('finishing_products_v1')||'null');
+    if(lp && lp.length) return lp;
+  }catch(e){}
+  return [];
+}
+
+
+// ── OFFLINE-FIRST SYNC ──
+const FIN_PENDING_KEY = 'finishing_pending_sync';
+
+function getFinQueue(){
+  try { return JSON.parse(localStorage.getItem(FIN_PENDING_KEY) || '[]'); } catch(e){ return []; }
+}
+function saveFinQueue(q){
+  localStorage.setItem(FIN_PENDING_KEY, JSON.stringify(q));
+}
+function addToFinQueue(payload){
+  var q = getFinQueue();
+  var filtered = q.filter(function(p){ return p.payload.id !== payload.id; });
+  filtered.push({ createdAt: new Date().toISOString(), payload: payload });
+  saveFinQueue(filtered);
+}
+
+async function sendFinToSupabase(payload){
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/condit_productions', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+    return res.ok || res.status === 201;
+  } catch(e) {
+    return false;
+  }
+}
+
+async function syncFinQueue(){
+  var q = getFinQueue();
+  if(!q.length) return;
+  var remaining = [];
+  for(var i = 0; i < q.length; i++){
+    var ok = await sendFinToSupabase(q[i].payload);
+    if(!ok) remaining.push(q[i]);
+  }
+  saveFinQueue(remaining);
+  updateFinSyncStatus();
+}
+
+function updateFinSyncStatus(){
+  var q  = getFinQueue();
+  var el = document.getElementById('fin-sync-status');
+  if(!el) return;
+  if(q.length === 0){
+    el.textContent = 'מסונכרן';
+    el.style.color = '#15803d';
+    el.style.background = '#f0fdf4';
+    el.style.borderColor = '#bbf7d0';
+  } else {
+    el.textContent = 'ממתין (' + q.length + ')';
+    el.style.color = '#d97706';
+    el.style.background = '#fffbeb';
+    el.style.borderColor = '#fde68a';
+  }
+}
+
+setInterval(function(){ if(getFinQueue().length > 0) syncFinQueue(); }, 30000);
+window.addEventListener('online', syncFinQueue);
+
+async function submit(){
+  const entries = Object.entries(quantities)
+    .filter(([,q])=>q>0)
+    .map(([name,qty])=>{
+      const p = products.find(p=>p.name===name);
+      return { id:p?p.id:null, name, qty, dest: destMap[name]||'חנות' };
+    });
+
+  if(!entries.length) return false;
+
+  const payload = {
+    id: submitLogId(),
+    date: isoDate(),
+    submitted_at: new Date().toISOString(),
+    worker: workerName,
+    role: 'finishing',
+    entries
+  };
+
+  var ok = await sendFinToSupabase(payload);
+  if(!ok){ addToFinQueue(payload); updateFinSyncStatus(); return true; }
+  updateFinSyncStatus();
+  return true;
+}
+
+// ── LOGIN ──
+document.getElementById('login-date').textContent = nowDate();
+const nameInput = document.getElementById('login-name');
+try{ var _fn = localStorage.getItem('finishing_worker_name'); if(_fn) nameInput.value = _fn; }catch(e){}
+document.getElementById('login-go').addEventListener('click', doLogin);
+nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+setTimeout(()=>nameInput.focus(), 300);
+
+async function doLogin(){
+  const name = nameInput.value.trim();
+  if(!name){ nameInput.style.borderColor='rgba(255,100,100,.8)'; nameInput.focus(); return; }
+  workerName = name;
+  try{ localStorage.setItem('finishing_worker_name', name); }catch(e){}
+  showLoading(true);
+  if(!products.length) products = await loadProducts();
+  showLoading(false);
+  initMain();
+  showScreen('screen-main');
+}
+
+document.getElementById('btn-change').addEventListener('click', ()=>showScreen('screen-login'));
+
+// ── MAIN ──
+function initMain(){
+  quantities = {}; destMap = {};
+  document.getElementById('top-date').textContent = nowDate();
+  document.getElementById('top-name').textContent = '✂️ '+workerName;
+  renderContent();
+  updateSummary();
+}
+
+function renderContent(){
+  const container = document.getElementById('main-content');
+
+  // Group by category
+  const cats = {};
+  products.forEach(p=>{
+    const c = p.category||'אחר';
+    if(!cats[c]) cats[c] = [];
+    cats[c].push(p);
+  });
+
+  const catIcons = {};
+
+  let html = '';
+  Object.keys(cats).forEach(cat=>{
+    const prods = cats[cat];
+    const catTotal = prods.reduce((s,p)=>s+(quantities[p.name]||0),0);
+    html += `<div class="cat-block">
+      <div class="cat-head">
+        <span class="cat-name">${cat}</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${catTotal>0?`<span class="cat-count">+${catTotal} יח'</span>`:''}
+          <button data-req-cat="${cat}"
+            style="background:none;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:11px;font-weight:700;cursor:pointer;padding:3px 8px;opacity:0.7;">הסר</button>
+        </div>
+      </div>`;
+
+    prods.forEach(p=>{
+      const qty  = quantities[p.name]||0;
+      const dest = destMap[p.name]||'חנות';
+      const id   = esc(p.name);
+      html += `
+        <div class="prod-row ${qty>0?'has-qty':''}" id="prow-${id}">
+          <div class="prod-label">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div class="prod-name">${p.name}</div>
+              <button data-req-prod="${p.id||p.name}" data-req-prod-name="${p.name}" data-req-cat-name="${cat}"
+                style="background:none;border:none;color:#dc2626;font-size:15px;cursor:pointer;padding:0 2px;opacity:0.5;">✕</button>
+            </div>
+            ${qty>0?`<div class="prod-dest">→ ${dest}</div>`:''}
+          </div>
+          ${qty>0?`
+          <select class="dest-select" data-dest="${id}" onchange="changeDest('${id}',this.value)">
+            ${DESTINATIONS.map(d=>`<option value="${d}" ${d===dest?'selected':''}>${d}</option>`).join('')}
+          </select>`:''}
+          <div class="qty-ctrl">
+            <button class="qty-btn ten" data-plus10="${id}">+10</button>
+            <button class="qty-btn" data-plus="${id}">+</button>
+            <div class="qty-val" id="qval-${id}">${qty>0?qty:'—'}</div>
+            <button class="qty-btn" data-minus="${id}">−</button>
+            <button class="qty-btn ten" data-minus10="${id}">−10</button>
+          </div>
+        </div>`;
+    });
+    html += `<div style="padding:8px 14px;border-top:1px solid var(--border);">
+      <button data-add-prod-cat="${cat}" style="background:none;border:1.5px dashed var(--border);border-radius:8px;width:100%;padding:7px;font-size:12px;color:var(--muted);cursor:pointer;font-weight:600;">+ הוסף מוצר ל${cat}</button>
+    </div>`;
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  attachEvents();
+}
+
+function changeDest(id, dest){
+  const name = deesc(id);
+  destMap[name] = dest;
+  // Update label without re-render
+  const row  = document.getElementById('prow-'+id);
+  const lbl  = row?.querySelector('.prod-dest');
+  if(lbl) lbl.textContent = '→ '+dest;
+}
+
+function attachEvents(){
+  document.querySelectorAll('[data-plus]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = deesc(btn.dataset.plus);
+      quantities[name] = (quantities[name]||0)+1;
+      if(!destMap[name]) destMap[name]='חנות';
+      updateRow(btn.dataset.plus); updateSummary();
+    });
+  });
+  document.querySelectorAll('[data-minus]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = deesc(btn.dataset.minus);
+      quantities[name] = Math.max(0,(quantities[name]||0)-1);
+      if(!quantities[name]) delete quantities[name];
+      updateRow(btn.dataset.minus); updateSummary();
+    });
+  });
+  document.querySelectorAll('[data-plus10]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = deesc(btn.dataset.plus10);
+      quantities[name] = (quantities[name]||0)+10;
+      if(!destMap[name]) destMap[name]='חנות';
+      updateRow(btn.dataset.plus10); updateSummary();
+    });
+  });
+  document.querySelectorAll('[data-minus10]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = deesc(btn.dataset.minus10);
+      quantities[name] = Math.max(0,(quantities[name]||0)-10);
+      if(!quantities[name]) delete quantities[name];
+      updateRow(btn.dataset.minus10); updateSummary();
+    });
+  });
+}
+
+function updateRow(id){
+  const name = deesc(id);
+  const qty  = quantities[name]||0;
+  const dest = destMap[name]||'חנות';
+  const row  = document.getElementById('prow-'+id);
+  const val  = document.getElementById('qval-'+id);
+  if(!row) return;
+
+  row.className = 'prod-row'+(qty>0?' has-qty':'');
+  if(val){ val.textContent = qty>0?qty:'—'; val.style.color = qty>0?'var(--success)':'var(--muted)'; }
+
+  // Show/hide dest select and label
+  const ctrl = row.querySelector('.qty-ctrl');
+  let destEl = row.querySelector('.dest-select');
+  let lblEl  = row.querySelector('.prod-dest');
+
+  if(qty>0 && !destEl){
+    const sel = document.createElement('select');
+    sel.className='dest-select';
+    sel.dataset.dest=id;
+    sel.innerHTML=DESTINATIONS.map(d=>`<option value="${d}" ${d===dest?'selected':''}>${d}</option>`).join('');
+    sel.addEventListener('change',()=>changeDest(id,sel.value));
+    row.insertBefore(sel, ctrl);
+  } else if(qty===0 && destEl){
+    destEl.remove();
+  }
+
+  if(qty>0 && !lblEl){
+    const lbl = document.createElement('div');
+    lbl.className='prod-dest';
+    lbl.textContent='→ '+dest;
+    row.querySelector('.prod-label').appendChild(lbl);
+  } else if(qty===0 && lblEl){
+    lblEl.remove();
+  }
+
+  // Update category count
+  const catBlock = row.closest('.cat-block');
+  if(catBlock){
+    const prods = catBlock.querySelectorAll('.prod-row');
+    let total = 0;
+    prods.forEach(r=>{
+      const rid  = r.id.replace('prow-','');
+      total += quantities[deesc(rid)]||0;
+    });
+    let badge = catBlock.querySelector('.cat-count');
+    if(total>0){
+      if(!badge){
+        badge = document.createElement('span');
+        badge.className='cat-count';
+        catBlock.querySelector('.cat-head').appendChild(badge);
+      }
+      badge.textContent='+'+total+" יח'";
+    } else if(badge){
+      badge.remove();
+    }
+  }
+}
+
+function updateSummary(){
+  const entries = Object.entries(quantities).filter(([,q])=>q>0);
+  const total   = entries.reduce((s,[,q])=>s+q,0);
+  const toStore = entries.filter(([n])=>(destMap[n]||'חנות')==='חנות').reduce((s,[,q])=>s+q,0);
+  const toOrder = entries.filter(([n])=>destMap[n]==='הזמנה').reduce((s,[,q])=>s+q,0);
+  const toWaste = entries.filter(([n])=>destMap[n]==='פח').reduce((s,[,q])=>s+q,0);
+
+  const sumEl = document.getElementById('submit-summary');
+  const btn   = document.getElementById('submit-btn');
+
+  if(!entries.length){
+    sumEl.innerHTML = 'מלא מה יצא היום';
+    btn.disabled = true;
+  } else {
+    const parts = [];
+    if(toStore) parts.push(`<b>${toStore}</b> לחנות`);
+    if(toOrder) parts.push(`<b>${toOrder}</b> להזמנה`);
+    if(toWaste) parts.push(`<b>${toWaste}</b> לפח`);
+    sumEl.innerHTML = parts.join(' · ')+` <span style="color:var(--muted);">(${entries.length} מוצרים)</span>`;
+    btn.disabled = false;
+  }
+}
+
+// ── SUBMIT ──
+
+// ── REMOVE REQUESTS ──
+async function requestRemove(type, catName, prodName){
+  var payload = {
+    id: 'REQ-' + Date.now(),
+    type: type,
+    cat_name: catName,
+    name: prodName || catName,
+    requested_by: workerName,
+    requested_at: new Date().toISOString(),
+    status: 'pending'
+  };
+  try{
+    var q = JSON.parse(localStorage.getItem('finishing_remove_requests')||'[]');
+    q.push(payload);
+    localStorage.setItem('finishing_remove_requests', JSON.stringify(q));
+  }catch(e){}
+  try{
+    await fetch(SB_URL+'/rest/v1/condit_requests',{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
+        'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+      body: JSON.stringify(payload)
+    });
+  }catch(e){}
+  showToast('בקשה נשלחה לאדמין לאישור');
+}
+
+function showToast(msg){
+  var ex = document.getElementById('fin-toast');
+  if(ex) ex.remove();
+  var t = document.createElement('div');
+  t.id = 'fin-toast';
+  t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;white-space:nowrap;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+function showAddProductModal(catName){
+  var ex = document.getElementById('fin-add-prod-modal');
+  if(ex) ex.remove();
+  var el = document.createElement('div');
+  el.id = 'fin-add-prod-modal';
+  el.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;';
+  el.innerHTML = `
+    <div style="background:#fff;width:100%;border-radius:18px 18px 0 0;padding:22px 18px 36px;direction:rtl;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">הוסף מוצר ל${catName}</div>
+      <input id="fin-new-prod" type="text" placeholder="שם המוצר..."
+        style="width:100%;border:2px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:16px;margin-bottom:12px;direction:rtl;font-family:inherit;">
+      <div style="display:flex;gap:10px;">
+        <button onclick="doAddFinProduct('${catName}')"
+          style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">+ הוסף</button>
+        <button onclick="document.getElementById('fin-add-prod-modal').remove();"
+          style="background:#f3f4f6;border:none;border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;color:#374151;">ביטול</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
+  setTimeout(()=>document.getElementById('fin-new-prod').focus(), 100);
+}
+
+async function doAddFinProduct(catName){
+  var inp = document.getElementById('fin-new-prod');
+  var name = (inp.value||'').trim();
+  if(!name){ inp.style.borderColor='#dc2626'; inp.focus(); return; }
+  var btn = document.querySelector('#fin-add-prod-modal button');
+  btn.textContent = '⏳ שומר...'; btn.disabled = true;
+  // Add to local products list
+  var newId = Date.now();
+  var newProd = { id: newId, name: name, category: catName, type: 'shelf' };
+  products.push(newProd);
+  // Save to localStorage
+  try{ localStorage.setItem('finishing_products_v1', JSON.stringify(products)); }catch(e){}
+  // Save to Supabase
+  try{
+    var res = await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main&select=data',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    var rows = await res.json();
+    var data = (rows&&rows[0]&&rows[0].data) ? rows[0].data : {};
+    if(!Array.isArray(data.products)) data.products = [];
+    data.products.push(newProd);
+    await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main',{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({data})
+    });
+  }catch(e){}
+  document.getElementById('fin-add-prod-modal').remove();
+  renderContent();
+}
+
+function showAddCatModal(){
+  var ex = document.getElementById('fin-add-cat-modal');
+  if(ex) ex.remove();
+  var el = document.createElement('div');
+  el.id = 'fin-add-cat-modal';
+  el.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;';
+  el.innerHTML = `
+    <div style="background:#fff;width:100%;border-radius:18px 18px 0 0;padding:22px 18px 36px;direction:rtl;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">קטגוריה חדשה</div>
+      <input id="fin-new-cat" type="text" placeholder="שם הקטגוריה..."
+        style="width:100%;border:2px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:16px;margin-bottom:12px;direction:rtl;font-family:inherit;">
+      <div style="display:flex;gap:10px;">
+        <button onclick="doAddFinCat()"
+          style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">+ הוסף קטגוריה</button>
+        <button onclick="document.getElementById('fin-add-cat-modal').remove();"
+          style="background:#f3f4f6;border:none;border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;color:#374151;">ביטול</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
+  setTimeout(()=>document.getElementById('fin-new-cat').focus(), 100);
+}
+
+function doAddFinCat(){
+  var inp = document.getElementById('fin-new-cat');
+  var name = (inp.value||'').trim();
+  if(!name){ inp.style.borderColor='#dc2626'; inp.focus(); return; }
+  document.getElementById('fin-add-cat-modal').remove();
+  showAddProductModal(name);
+}
+
+// ── REMOVE DELEGATION ──
+document.getElementById('main-content').addEventListener('click', function(e){
+  var catBtn = e.target.closest('[data-req-cat]');
+  if(catBtn){
+    var cat = catBtn.dataset.reqCat;
+    if(confirm('לבקש הסרת קטגוריה "'+cat+'"? האדמין יאשר.')){
+      requestRemove('remove_cat', cat, null);
+    }
+    return;
+  }
+  var prodBtn = e.target.closest('[data-req-prod]');
+  if(prodBtn){
+    var prodName = prodBtn.dataset.reqProdName;
+    var catName  = prodBtn.dataset.reqCatName;
+    if(confirm('לבקש הסרת "'+prodName+'"? האדמין יאשר.')){
+      requestRemove('remove_product', catName, prodName);
+    }
+    return;
+  }
+  // Add product to category
+  var addBtn = e.target.closest('[data-add-prod-cat]');
+  if(addBtn){
+    showAddProductModal(addBtn.dataset.addProdCat);
+  }
+});
+
+document.getElementById('submit-btn').addEventListener('click', async ()=>{
+  var _fb = document.getElementById('submit-btn');
+  if(_fb.dataset.sending === '1') return;
+  _fb.dataset.sending = '1'; _fb.disabled = true;
+  showLoading(true);
+  const ok = await submit();
+  showLoading(false);
+  _fb.dataset.sending = '0'; _fb.disabled = false;
+  if(ok){
+    const entries = Object.entries(quantities).filter(([,q])=>q>0);
+    document.getElementById('done-sub').textContent = workerName+' · '+isoDate();
+    document.getElementById('done-list').innerHTML = entries.slice(0,12).map(([name,qty])=>`
+      <div class="done-item">
+        <span>${name}</span>
+        <span class="done-item-qty">${qty} יח' → ${destMap[name]||'חנות'}</span>
+      </div>`).join('')+
+      (entries.length>12?`<div class="done-item" style="opacity:.6"><span>ועוד ${entries.length-12}...</span></div>`:'');
+    showScreen('screen-done');
+  } else {
+    alert('שגיאה בשליחה — נסה שוב');
+  }
+});
+
+document.getElementById('btn-again').addEventListener('click', ()=>{ initMain(); showScreen('screen-main'); });
+</script>
+</body>
+</html>
