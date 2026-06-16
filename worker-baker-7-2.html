@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>בצקים — דוח ייצור</title>
+<style>
+:root{
+  --bg:#f0f2f5;
+  --surface:#fff;
+  --border:#e4e8ee;
+  --text:#111827;
+  --muted:#6b7688;
+  --primary:#2563eb;
+  --primary-soft:#eff6ff;
+  --primary-border:#bfdbfe;
+  --success:#15803d;
+  --success-soft:#f0fdf4;
+  --success-border:#bbf7d0;
+  --danger:#dc2626;
+  --danger-soft:#fff5f5;
+  --danger-border:#fecaca;
+  --warning:#b45309;
+  --warning-soft:#fffbeb;
+  --warning-border:#fde68a;
+  --radius:13px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg)}
+body{font-family:'Segoe UI',system-ui,Arial,sans-serif;direction:rtl;color:var(--text);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;outline:none}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* LOGIN */
+#screen-login{
+  align-items:center;justify-content:center;padding:32px 24px;
+  background:linear-gradient(160deg,#1e3a8a,#2563eb)
+}
+.login-title{font-size:26px;font-weight:800;color:#fff;margin-bottom:4px}
+.login-sub{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:32px}
+.login-input{
+  width:100%;max-width:320px;background:rgba(255,255,255,.15);
+  border:2px solid rgba(255,255,255,.3);border-radius:var(--radius);
+  padding:15px 18px;font-size:20px;font-weight:700;color:#fff;
+  text-align:center;margin-bottom:12px
+}
+.login-input::placeholder{color:rgba(255,255,255,.4)}
+.login-input:focus{border-color:rgba(255,255,255,.7)}
+.login-go{
+  width:100%;max-width:320px;background:#fff;color:var(--primary);
+  border:none;border-radius:var(--radius);padding:15px;
+  font-size:17px;font-weight:800;cursor:pointer
+}
+
+/* MAIN */
+#screen-main{background:var(--bg)}
+.top-bar{
+  position:sticky;top:0;z-index:10;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:12px 16px;box-shadow:0 1px 6px rgba(0,0,0,.07)
+}
+.top-row{display:flex;justify-content:space-between;align-items:center}
+.top-name{font-size:17px;font-weight:800}
+.top-date{font-size:11px;color:var(--muted);margin-top:1px}
+.top-change{font-size:12px;color:var(--primary);cursor:pointer;font-weight:600}
+
+.content{flex:1;padding:12px 12px 180px}
+
+/* DOUGH FAMILY BLOCK */
+.fam-block{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:10px;
+  overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.06)
+}
+.fam-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  background:var(--bg)
+}
+.fam-head-left{display:flex;align-items:center;gap:8px}
+.fam-icon{display:none}
+.fam-name{font-size:14px;font-weight:800;color:var(--text)}
+.fam-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.fam-kg-badge{
+  font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;
+  background:var(--primary-soft);border:1px solid var(--primary-border);color:var(--primary)
+}
+.fam-kg-badge.empty{background:var(--bg);border-color:var(--border);color:var(--muted)}
+
+/* DOUGH ROW — batchKg input */
+.dough-row{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  background:#fafbfc
+}
+.dough-row:last-child{border-bottom:none}
+.dough-label{flex:1}
+.dough-name{font-size:14px;font-weight:700;color:var(--primary)}
+.dough-hint{font-size:11px;color:var(--muted);margin-top:2px}
+.dough-input-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dough-input{
+  width:80px;text-align:center;font-size:19px;font-weight:800;
+  border:2px solid var(--border);border-radius:10px;padding:8px 4px;
+  background:var(--bg);color:var(--muted);
+  -webkit-appearance:none;transition:all .15s
+}
+.dough-input.has-val{
+  border-color:var(--primary-border);background:var(--primary-soft);color:var(--primary)
+}
+.dough-input-unit{font-size:10px;color:var(--muted)}
+
+/* DOUGH UNITS */
+.dough-units-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;margin-right:6px;}
+.dough-units{
+  width:60px;text-align:center;font-size:17px;font-weight:800;
+  border:2px solid var(--border);border-radius:10px;padding:8px 4px;
+  background:var(--bg);color:var(--muted);
+  -webkit-appearance:none;transition:all .15s
+}
+.dough-units.has-val{
+  border-color:#7c3aed33;background:#f5f3ff;color:#7c3aed
+}
+.dough-units-label{font-size:10px;color:var(--muted)}
+
+/* TODAY BANNER */
+.today-banner{
+  margin:10px 12px 2px;padding:10px 14px;
+  background:var(--warning-soft);border:1px solid var(--warning-border);
+  border-radius:var(--radius);font-size:12px;font-weight:700;color:var(--warning);
+  display:flex;align-items:center;gap:6px;
+}
+
+/* PRODUCT ROW — +/- */
+.prod-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--border)
+}
+.prod-row:last-child{border-bottom:none}
+.prod-row.has-qty{background:var(--primary-soft)}
+.prod-name{flex:1;font-size:15px;font-weight:600;color:var(--text)}
+.prod-plan{font-size:11px;color:var(--primary);font-weight:700;margin-top:2px}
+.qty-ctrl{display:flex;align-items:center;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;overflow:hidden}
+.prod-row.has-qty .qty-ctrl{border-color:var(--primary-border);background:var(--primary-soft)}
+.qty-btn{width:42px;height:42px;border:none;background:none;font-size:22px;font-weight:300;color:var(--muted);cursor:pointer}
+.qty-btn:active{background:var(--primary);color:#fff}
+.qty-btn.qty-ten{width:auto;padding:0 10px;font-size:13px;font-weight:800;border-right:none;background:var(--bg)}
+.qty-btn.qty-ten:active{background:var(--primary);color:#fff}
+.qty-val{min-width:48px;text-align:center;font-size:17px;font-weight:800;color:var(--muted)}
+.prod-row.has-qty .qty-val{color:var(--primary)}
+
+/* NOTE (tomorrow dough) */
+.tomorrow-note{
+  font-size:11px;color:var(--warning);font-weight:700;
+  background:var(--warning-soft);border-top:1px solid var(--warning-border);
+  padding:7px 14px;display:flex;align-items:center;gap:5px
+}
+
+/* SUBMIT BAR */
+.submit-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:10px 16px 26px;box-shadow:0 -4px 16px rgba(0,0,0,.08)
+}
+.submit-summary{font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px;font-weight:600}
+.submit-summary span{color:var(--primary);font-weight:800}
+.submit-btn{
+  width:100%;padding:15px;background:var(--primary);color:#fff;
+  border:none;border-radius:var(--radius);font-size:17px;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 18px rgba(37,99,235,.3)
+}
+.submit-btn:disabled{background:#94a3b8;box-shadow:none}
+
+/* SUCCESS */
+#screen-done{
+  align-items:center;justify-content:center;padding:32px 24px;
+  background:linear-gradient(160deg,#14532d,#16a34a)
+}
+.done-icon{font-size:72px;margin-bottom:14px;animation:pop .4s ease}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.done-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:6px}
+.done-sub{font-size:13px;color:rgba(255,255,255,.75);margin-bottom:28px;text-align:center}
+.done-list{
+  width:100%;max-width:340px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);
+  padding:14px;margin-bottom:24px
+}
+.done-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12);
+  color:#fff;font-size:13px
+}
+.done-item:last-child{border-bottom:none}
+.done-item-qty{font-weight:800;font-size:15px}
+.done-again{
+  background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;border-radius:var(--radius);padding:13px 28px;
+  font-size:15px;font-weight:700;cursor:pointer
+}
+
+/* LOADING */
+.loading{
+  position:fixed;inset:0;background:rgba(255,255,255,.88);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px
+}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;font-weight:600;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-title">בצקים — ייצור</div>
+  <div class="login-sub" id="login-date"></div>
+  <input class="login-input" id="login-name" type="text" placeholder="שם..." autocomplete="off" autocorrect="off">
+  <button class="login-go" id="login-go">התחל ›</button>
+</div>
+
+<!-- MAIN -->
+<div id="screen-main" class="screen">
+  <div class="top-bar">
+    <div class="top-row">
+      <div>
+        <div class="top-date" id="top-date"></div>
+        <div class="top-name" id="top-name"></div>
+      <div id="baker-sync-status" style="font-size:10px;font-weight:700;margin-top:3px;padding:2px 8px;border-radius:10px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;display:inline-block;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span onclick="showHistoryScreen()" style="font-size:12px;color:var(--primary);cursor:pointer;font-weight:700;background:var(--primary-soft);border:1px solid var(--primary-border);padding:4px 10px;border-radius:999px;">היסטוריה</span>
+        <div class="top-change" id="btn-change">החלף ›</div>
+      </div>
+    </div>
+  </div>
+  <div id="today-banner" style="display:none"></div>
+  <div class="content" id="main-content"></div>
+  <div class="submit-bar">
+    <button onclick="showAddFamilyModal()"
+      style="width:100%;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">
+      + קטגוריה חדשה
+    </button>
+    <div class="submit-summary" id="submit-summary">מלא מה הכנת היום</div>
+    <button class="submit-btn" id="submit-btn" disabled>שלח דוח ✓</button>
+  </div>
+</div>
+
+<!-- DONE -->
+<div id="screen-done" class="screen">
+  
+  <div class="done-title">נשלח!</div>
+  <div class="done-sub" id="done-sub"></div>
+  <div class="done-list" id="done-list"></div>
+  <button class="done-again" id="btn-again">דוח נוסף</button>
+</div>
+
+<div class="loading" id="loading" style="display:none">
+  <div class="spinner"></div>
+  <div class="loading-text">טוען...</div>
+</div>
+
+<script>
+const SB_URL = 'https://lwmhoanpqrfpqiuwuuxi.supabase.co';
+const SB_KEY = 'sb_publishable_497hKKPETHnosuN2hgIw-g_OB8hbHkB';
+
+// ── BAKER STRUCTURE ──
+// Each family has doughs (kg input) and products (unit +/-)
+const BAKER_FAMILIES = [
+  {
+    id: 'shamrim', name: 'שמרים', icon: '',
+    batchKg: null, maxKg: 120,
+    doughs: [
+      { id: 'dough-croissant',   name: 'בצק קוראסון',   hint: '8.6 ק"ג לבצק', unit: 'ק"ג' },
+      { id: 'dough-krantz',      name: 'בצק קראנץ',      hint: '', unit: 'ק"ג' },
+      { id: 'dough-pressburger', name: 'בצק פרסבורגר',  hint: '', unit: 'ק"ג' },
+    ],
+    products: [
+      'קוראסון חמאה','קוראסון שוקולד','קוראסון שקדים','קוראסון פיסטוק',
+      'גביניות','מאפה צאן','קינמון','מיני חמאה','מיני קינמון','רוגעלך',
+      'קראנץ שוקולד','קראנץ חלווה','קראנץ קינמון',
+      'קראנץ ריקוטה חמוציות','קראנץ תפוחים ופקאן',
+      'פרסבורגר פרג',
+    ]
+  },
+  {
+    id: 'boker', name: 'לחם בוקר', icon: '',
+    note: 'בצק היום — אפייה מחר',
+    batchKg: null, maxKg: 80,
+    doughs: [
+      { id: 'dough-boker', name: 'בצק לחם בוקר', hint: 'אפייה מחר בוקר', unit: 'ק"ג' },
+    ],
+    products: [
+      'לחם בוקר דגנים','לחם בוקר אגוזים','לחם בוקר קל',
+      'לחם בוקר אגוזים צימוקים','לחם בוקר פרג',
+    ]
+  },
+  {
+    id: 'shifon', name: 'שיפון וכוסמין', icon: '',
+    note: 'נאפים באותו היום',
+    batchKg: null, maxKg: 80,
+    doughs: [
+      { id: 'dough-shifon60',  name: 'בצק שיפון 60',  hint: 'אפייה ישירה', unit: 'ק"ג' },
+      { id: 'dough-shifon100', name: 'בצק שיפון 100', hint: 'אפייה ישירה', unit: 'ק"ג' },
+      { id: 'dough-kusmin',    name: 'בצק כוסמין',    hint: 'אפייה ישירה', unit: 'ק"ג' },
+    ],
+    products: ['שיפון 60','שיפון 100','כוסמין']
+  },
+  {
+    id: 'kasten', name: 'קסטן ומוצריו', icon: '',
+    note: 'לפי צורך',
+    batchKg: null, maxKg: 60,
+    doughs: [
+      { id: 'dough-kasten', name: 'בצק קסטן', hint: 'לפי צורך', unit: 'ק"ג' },
+    ],
+    products: ['לחם קסטן','מקלות גרנולה','מקלות זיתים']
+  },
+  {
+    id: 'jabata', name: "ג'בטה", icon: '',
+    batchKg: null, maxKg: 40,
+    doughs: [
+      { id: 'dough-jabata', name: "בצק ג'בטה", hint: '', unit: 'ק"ג' },
+    ],
+    products: ["ג'בטה","ג'בטה מיני"]
+  },
+  {
+    id: 'challa', name: 'חלה', icon: '',
+    note: 'לשישי בלבד',
+    batchKg: null, maxKg: 60,
+    doughs: [
+      { id: 'dough-challa', name: 'בצק חלה', hint: 'לשישי', unit: 'ק"ג' },
+    ],
+    products: ['חלה','חלה קטנה','חלה עם גרעינים']
+  },
+  {
+    id: 'puff', name: 'עלים ופריך', icon: '',
+    batchKg: null, maxKg: 30,
+    doughs: [
+      { id: 'dough-puff',   name: 'בצק עלים',  hint: 'מקלות גבינה',      unit: 'ק"ג' },
+      { id: 'dough-prikha', name: 'בצק פריך',  hint: 'מיני טארט, טארטים', unit: 'ק"ג' },
+    ],
+    products: ['מקלות גבינה','מיני טארט','טארט']
+  },
+  {
+    id: 'maluchim', name: 'מלוחים ומגשים', icon: '',
+    batchKg: null, maxKg: 40,
+    doughs: [
+      { id: 'dough-quiche', name: 'בצק קיש', hint: 'קיש, פשטידות, מגשים', unit: 'ק"ג' },
+    ],
+    products: ['קיש','מיני קיש','קיש גדול','פשטידה','מיני פשטידות'],
+  },
+  {
+    id: 'mini-sweet', name: 'מיני מתוקים', icon: '',
+    batchKg: null, maxKg: 30,
+    doughs: [],
+    products: ['בראוניז','כדורי שוקולד','פיננסייר','מיני סופלה'],
+  },
+  {
+    id: 'burekas', name: 'בורקסים', icon: '',
+    batchKg: null, maxKg: 50,
+    doughs: [
+      { id: 'dough-burekas', name: 'בצק בורקס', hint: '', unit: 'ק"ג' },
+    ],
+    products: [
+      'בוריקיטס','בואיקוס קשקבל','בואיקוס תרד','בואיקוס בטטה',
+      'אצבע תרד','אצבע גבינה',
+      'תפו"א','תפו"א גבינה','פיטריות',
+      'נחש גבינה','נחש תרד','נחש תפו"א',
+    ],
+  },
+  {
+    id: 'ugiot', name: 'עוגיות', icon: '',
+    batchKg: null, maxKg: 20,
+    doughs: [
+      { id: 'dough-ugiot', name: 'מנת עוגיות', hint: '', unit: 'מנה' },
+    ],
+    products: [
+      'אמסטרדם','פרמזן','קרקר דגנים','שוקו צ׳יפס',
+      'חמאה שקדים','חמאה ליים','גרנולה','פקאן','שוקו פיסטוק',
+    ],
+  },
+  {
+    id: 'bchushot', name: 'עוגות בחושות', icon: '',
+    batchKg: null, maxKg: 20,
+    doughs: [
+      { id: 'dough-bchushot', name: 'מנת בחושות', hint: '', unit: 'מנה' },
+    ],
+    products: [
+      'ליים פיסטוק','פאדג׳ שוקולד','חלווה שוקולד',
+      'גזר','תפוז','שיש','שזיפים',
+    ],
+  },
+];
+
+// ── STATE ──
+let workerName  = '';
+let doughKg     = {};   // doughId → kg
+let doughUnits  = {};   // doughId → units (יחידות בצק)
+let productQty  = {};   // productName → qty
+let planMap     = {};   // productName → planned qty
+let allProducts = [];
+let activeFamilies = BAKER_FAMILIES; // overridden from cloud on load
+
+function nowDate(){
+  return new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+}
+function isoDate(){
+  return new Date().toISOString().slice(0,10);
+}
+function showLoading(v){ document.getElementById('loading').style.display = v?'flex':'none'; }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── SUPABASE ──
+async function loadData(){
+  try{
+    const res  = await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main&select=data',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const rows = await res.json();
+    if(!rows||!rows[0]||!rows[0].data) return;
+    const data = rows[0].data;
+    allProducts = Array.isArray(data.products) ? data.products : [];
+
+    // Always use hardcoded BAKER_FAMILIES — never override from cloud
+    // (baker_families in cloud may be stale)
+    activeFamilies = BAKER_FAMILIES;
+
+    // Load plan for today/tomorrow
+    const today = isoDate();
+    let offset=1;
+    while(new Date(new Date().getTime()+offset*86400000).getDay()===6) offset++;
+    const tomorrow = new Date(new Date().getTime()+offset*86400000).toISOString().slice(0,10);
+    planMap = {};
+    if(Array.isArray(data.productions)){
+      data.productions
+        .filter(r=>(r.date===today||r.date===tomorrow)&&r.note==='תכנון מחר')
+        .forEach(r=>{
+          const p = allProducts.find(p=>Number(p.id)===Number(r.productId));
+          if(p) planMap[p.name] = (planMap[p.name]||0)+Number(r.qty||0);
+        });
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function saveBakerFamilies(families){
+  try {
+    // Read current state first
+    const res = await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main&select=data',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const rows = await res.json();
+    const data = (rows&&rows[0]&&rows[0].data) ? rows[0].data : {};
+    data.baker_families = families;
+    await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main',{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({data})
+    });
+    activeFamilies = families;
+  } catch(e){ console.error(e); }
+}
+
+async function addProductToFamily(famId, productName){
+  const fam = activeFamilies.find(f=>f.id===famId);
+  if(!fam || fam.products.includes(productName)) return;
+  fam.products.push(productName);
+  await saveBakerFamilies(activeFamilies);
+}
+
+async function removeProductFromFamily(famId, productName){
+  const fam = activeFamilies.find(f=>f.id===famId);
+  if(!fam) return;
+  fam.products = fam.products.filter(p=>p!==productName);
+  await saveBakerFamilies(activeFamilies);
+}
+
+
+
+
+// ── OFFLINE-FIRST SYNC ──
+const BAKER_PENDING_KEY = 'baker_pending_sync';
+
+function getBakerQueue(){
+  try { return JSON.parse(localStorage.getItem(BAKER_PENDING_KEY) || '[]'); } catch(e){ return []; }
+}
+function saveBakerQueue(q){
+  localStorage.setItem(BAKER_PENDING_KEY, JSON.stringify(q));
+}
+function addToBakerQueue(payload){
+  var q = getBakerQueue();
+  // Remove existing entry for same id
+  var filtered = q.filter(function(p){ return p.payload.id !== payload.id; });
+  filtered.push({ createdAt: new Date().toISOString(), payload: payload });
+  saveBakerQueue(filtered);
+}
+
+async function sendBakerToSupabase(payload){
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/condit_productions', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+    return res.ok || res.status === 201;
+  } catch(e) {
+    return false;
+  }
+}
+
+async function syncBakerQueue(){
+  var q = getBakerQueue();
+  if(!q.length) return;
+  var remaining = [];
+  for(var i = 0; i < q.length; i++){
+    var ok = await sendBakerToSupabase(q[i].payload);
+    if(!ok) remaining.push(q[i]);
+  }
+  saveBakerQueue(remaining);
+  updateBakerSyncStatus();
+}
+
+function updateBakerSyncStatus(){
+  var q  = getBakerQueue();
+  var el = document.getElementById('baker-sync-status');
+  if(!el) return;
+  if(q.length === 0){
+    el.textContent = 'מסונכרן';
+    el.style.color  = '#15803d';
+    el.style.background = '#f0fdf4';
+    el.style.borderColor = '#bbf7d0';
+  } else {
+    el.textContent = 'ממתין (' + q.length + ')';
+    el.style.color  = '#d97706';
+    el.style.background = '#fffbeb';
+    el.style.borderColor = '#fde68a';
+  }
+}
+
+// Retry every 30 seconds
+setInterval(function(){
+  if(getBakerQueue().length > 0) syncBakerQueue();
+}, 30000);
+
+// Retry when back online
+window.addEventListener('online', syncBakerQueue);
+
+const BAKER_LAST_KEY = 'baker_last_report';
+
+function saveTodayReport(submittedAt){
+  try{
+    localStorage.setItem(BAKER_LAST_KEY, JSON.stringify({
+      date: isoDate(),
+      worker: workerName,
+      submittedAt: submittedAt
+    }));
+  }catch(e){}
+}
+
+function checkTodayReport(){
+  try{
+    var last = JSON.parse(localStorage.getItem(BAKER_LAST_KEY)||'null');
+    if(!last) return;
+    if(last.date !== isoDate()) return;
+    if(last.worker !== workerName) return;
+    var t    = new Date(last.submittedAt);
+    var hhmm = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+    var banner = document.getElementById('today-banner');
+    banner.className = 'today-banner';
+    banner.style.display = 'flex';
+    banner.innerHTML = '⚠️ דיווחת היום ב-'+hhmm+' — דוח נוסף ישמר לאישור אדמין';
+  }catch(e){}
+}
+
+async function submitReport(){
+  const entries = [];
+
+  // Dough entries (with units)
+  Object.entries(doughKg).forEach(([did, kg])=>{
+    if(kg > 0){
+      var units = doughUnits[did] || 0;
+      entries.push({ type:'dough', id:did, name:did, qty:kg, unit:'ק"ג', doughUnits: units||null });
+    }
+  });
+
+  // Product entries
+  Object.entries(productQty).forEach(([name, qty])=>{
+    if(qty > 0){
+      const p = allProducts.find(p=>p.name===name);
+      entries.push({ type:'product', id:p?p.id:null, name, qty, unit:'יח\'' });
+    }
+  });
+
+  if(!entries.length) return false;
+
+  const payload = {
+    id:   submitLogId(),
+    date: isoDate(),
+    submitted_at: new Date().toISOString(),
+    worker: workerName,
+    role:   'baker',
+    status: 'pending',
+    entries
+  };
+
+  var ok = await sendBakerToSupabase(payload);
+  if(!ok){
+    addToBakerQueue(payload);
+    updateBakerSyncStatus();
+    return true;
+  }
+  updateBakerSyncStatus();
+  return true;
+}
+
+// ── LOGIN ──
+document.getElementById('login-date').textContent = nowDate();
+const nameInput = document.getElementById('login-name');
+const loginGo   = document.getElementById('login-go');
+try{ var _bn = localStorage.getItem('baker_worker_name'); if(_bn) nameInput.value = _bn; }catch(e){}
+
+async function doLogin(){
+  const name = nameInput.value.trim();
+  if(!name){ nameInput.style.borderColor='rgba(255,100,100,.8)'; nameInput.focus(); return; }
+  workerName = name;
+  try{ localStorage.setItem('baker_worker_name', name); }catch(e){}
+  showLoading(true);
+  await loadData();
+  await loadTodayReports();
+  showLoading(false);
+  checkTodayReport();
+  initMain();
+  showScreen('screen-main');
+}
+loginGo.addEventListener('click', doLogin);
+nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+setTimeout(()=>nameInput.focus(), 300);
+
+document.getElementById('btn-change').addEventListener('click', ()=>{ showScreen('screen-login'); });
+
+// ── MAIN ──
+function initMain(){
+  doughKg = {}; doughUnits = {}; productQty = {};
+  document.getElementById('top-date').textContent = nowDate();
+  document.getElementById('top-name').textContent = '👤 '+workerName;
+  renderContent();
+  updateSummary();
+}
+
+function renderContent(){
+  const container = document.getElementById('main-content');
+  let html = '';
+
+  activeFamilies.forEach(fam=>{
+    // Total kg entered for this family
+    const famKg = fam.doughs.reduce((s,d)=>s+(doughKg[d.id]||0), 0);
+    const hasKg = famKg > 0;
+
+    html += `<div class="fam-block">
+      <div class="fam-head">
+        <div class="fam-head-left">
+          
+          <div>
+            <div class="fam-name">${fam.name}</div>
+            ${fam.note?`<div class="fam-sub">${fam.note}</div>`:''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="fam-kg-badge ${hasKg?'':'empty'}">${hasKg ? famKg.toFixed(1)+' ק"ג' : '—'}</span>
+          <button data-req-fam-id="${fam.id}" data-req-fam-name="${fam.name}"
+            style="background:none;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:11px;font-weight:700;cursor:pointer;padding:3px 8px;opacity:0.7;">הסר</button>
+        </div>
+      </div>`;
+
+    // Note (above products, not after doughs)
+    if(fam.note){
+      html += `<div class="tomorrow-note">⏰ ${fam.note}</div>`;
+    }
+
+    // Dough inputs
+    fam.doughs.forEach(d=>{
+      const val   = doughKg[d.id] || 0;
+      const units = doughUnits[d.id] || 0;
+      html += `
+        <div class="dough-row">
+          <div class="dough-label">
+            <div class="dough-name">${d.name}</div>
+            ${d.hint?`<div class="dough-hint">${d.hint}</div>`:''}
+          </div>
+          <div class="dough-units-wrap">
+            <input type="number" inputmode="numeric" min="0" step="1"
+              class="dough-units ${units>0?'has-val':''}"
+              data-dough-units="${d.id}"
+              value="${units>0?units:''}" placeholder="—">
+            <div class="dough-units-label">יח' בצק</div>
+          </div>
+          <div class="dough-input-wrap">
+            <input type="number" inputmode="decimal" min="0" step="0.1"
+              class="dough-input ${val>0?'has-val':''}"
+              data-dough="${d.id}" data-maxkg="${fam.maxKg||99}"
+              value="${val>0?val:''}" placeholder="—">
+            <div class="dough-input-unit">ק"ג</div>
+          </div>
+        </div>`;
+    });
+
+    // Product rows
+    fam.products.forEach(name=>{
+      const qty       = productQty[name] || 0;
+      const planned   = planMap[name]    || 0;
+      const reported  = getProductReportedQtyToday(name);
+      html += `
+        <div class="prod-row ${qty>0?'has-qty':''}" id="prow-${esc(name)}">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="prod-name">${name}</div>
+              <button data-req-prod-fam="${fam.id}" data-req-prod-name="${name}"
+                style="background:none;border:none;color:#dc2626;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;opacity:0.5;">✕</button>
+            </div>
+            ${reported>0?`<div style="font-size:10px;color:#d97706;font-weight:600;">דווח היום: ${reported} יח'</div>`:''}
+            ${planned>0?`<div class="prod-plan">יעד: ${planned} יח'</div>`:''}
+          </div>
+          <div class="qty-ctrl">
+            <button class="qty-btn qty-ten" data-plus10="${esc(name)}">+10</button>
+            <button class="qty-btn" data-plus="${esc(name)}">+</button>
+            <div class="qty-val" id="qval-${esc(name)}">${qty>0?qty:'—'}</div>
+            <button class="qty-btn" data-minus="${esc(name)}">−</button>
+            <button class="qty-btn qty-ten" data-minus10="${esc(name)}">−10</button>
+          </div>
+        </div>`;
+    });
+
+    // + Add product button per category
+    html += `<button onclick="showAddProductModal('${fam.id}')"
+      style="width:100%;background:#eff6ff;color:#2563eb;border:1px dashed #93c5fd;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;">
+      + מוצר לקטגוריה
+    </button>`;
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+  attachEvents();
+}
+
+function esc(s){ return s.replace(/[^א-תa-zA-Z0-9]/g,'_'); }
+
+function attachEvents(){
+  // Dough units inputs
+  document.querySelectorAll('[data-dough-units]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const did = inp.dataset.doughUnits;
+      const val = parseInt(inp.value)||0;
+      if(val > 0){
+        doughUnits[did] = val;
+      } else {
+        delete doughUnits[did];
+        inp.value = '';
+      }
+      inp.className = 'dough-units'+(doughUnits[did]>0?' has-val':'');
+      updateSummary();
+    });
+  });
+
+  // Dough inputs
+  document.querySelectorAll('.dough-input').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const did   = inp.dataset.dough;
+      const maxKg = parseFloat(inp.dataset.maxkg)||99;
+      const val   = parseFloat(inp.value)||0;
+
+      if(val > 0){
+        // Validation
+        if(val > maxKg){
+          if(!confirm(`${val} ק"ג — יותר מהמקסימום הצפוי (${maxKg} ק"ג). בטוח?`)){
+            inp.value = doughKg[did]>0 ? doughKg[did] : '';
+            return;
+          }
+        }
+        const batchKg = activeFamilies.find(f=>f.doughs.some(d=>d.id===did))?.batchKg;
+        if(batchKg && val > batchKg * 1.4 && Math.round(val/batchKg) !== Math.round(val/batchKg*10)/10){
+          const suggest = Math.round(val/batchKg)*batchKg;
+          if(!confirm(`${val} ק"ג — התכוונת ל-${suggest} ק"ג (${Math.round(suggest/batchKg)} בצקים)?`)){
+            inp.value = doughKg[did]>0 ? doughKg[did] : '';
+            return;
+          }
+        }
+        doughKg[did] = Math.round(val*10)/10;
+      } else {
+        delete doughKg[did];
+        inp.value = '';
+      }
+
+      inp.className = 'dough-input'+(doughKg[did]>0?' has-val':'');
+
+      // Update family kg badge
+      const fam   = activeFamilies.find(f=>f.doughs.some(d=>d.id===did));
+      if(fam){
+        const famKg = fam.doughs.reduce((s,d)=>s+(doughKg[d.id]||0),0);
+        // Find badge — update without full re-render
+        inp.closest('.fam-block')?.querySelector('.fam-kg-badge')
+          ?.setAttribute('class','fam-kg-badge'+(famKg>0?'':' empty'));
+        if(inp.closest('.fam-block')?.querySelector('.fam-kg-badge'))
+          inp.closest('.fam-block').querySelector('.fam-kg-badge').textContent =
+            famKg>0 ? famKg.toFixed(1)+' ק"ג' : '—';
+      }
+      updateSummary();
+    });
+  });
+
+  document.querySelectorAll('[data-plus10]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = decodeEsc(btn.dataset.plus10);
+      productQty[name] = (productQty[name]||0)+10;
+      updateProdRow(name); updateSummary();
+    });
+  });
+  document.querySelectorAll('[data-minus10]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = decodeEsc(btn.dataset.minus10);
+      productQty[name] = Math.max(0,(productQty[name]||0)-10);
+      if(productQty[name]===0) delete productQty[name];
+      updateProdRow(name); updateSummary();
+    });
+  });
+  // Product +/-
+  document.querySelectorAll('[data-plus]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = decodeEsc(btn.dataset.plus);
+      productQty[name] = (productQty[name]||0)+1;
+      updateProdRow(name);
+      updateSummary();
+    });
+  });
+  document.querySelectorAll('[data-minus]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = decodeEsc(btn.dataset.minus);
+      productQty[name] = Math.max(0,(productQty[name]||0)-1);
+      if(productQty[name]===0) delete productQty[name];
+      updateProdRow(name);
+      updateSummary();
+    });
+  });
+}
+
+function decodeEsc(s){ return s.replace(/_/g,' '); }
+
+// ── REMOVE REQUEST HANDLERS ──
+document.getElementById('main-content').addEventListener('click', function(e){
+  // Product remove request
+  var prodBtn = e.target.closest('[data-req-prod-fam]');
+  if(prodBtn){
+    var famId = prodBtn.dataset.reqProdFam;
+    var name  = prodBtn.dataset.reqProdName;
+    if(confirm('לבקש הסרת "' + name + '" מהרשימה? האדמין יאשר.')){
+      requestRemove('remove_product', famId, name);
+    }
+    return;
+  }
+  // Family remove request
+  var famBtn = e.target.closest('[data-req-fam-id]');
+  if(famBtn){
+    var famId2 = famBtn.dataset.reqFamId;
+    var famName = famBtn.dataset.reqFamName;
+    if(confirm('לבקש הסרת קטגוריה "' + famName + '"? האדמין יאשר.')){
+      requestRemove('remove_family', famId2, famName);
+    }
+    return;
+  }
+});
+
+
+function updateProdRow(name){
+  const key = esc(name);
+  const row = document.getElementById('prow-'+key);
+  const val = document.getElementById('qval-'+key);
+  const qty = productQty[name]||0;
+  if(row) row.className = 'prod-row'+(qty>0?' has-qty':'');
+  if(val) val.textContent = qty>0?qty:'—';
+}
+
+function updateSummary(){
+  const btn   = document.getElementById('submit-btn');
+  const sumEl = document.getElementById('submit-summary');
+
+  // Build per-family summary
+  const famLines = [];
+  let anyData = false;
+
+  activeFamilies.forEach(fam=>{
+    const famKg = fam.doughs.reduce((s,d)=>s+(doughKg[d.id]||0), 0);
+    const famProds = fam.products.filter(n=>productQty[n]>0);
+    const famUnits = famProds.reduce((s,n)=>s+(productQty[n]||0), 0);
+
+    if(famKg > 0 || famUnits > 0){
+      anyData = true;
+      let line = `<b>${fam.name}:</b> `;
+      const parts = [];
+      if(famKg > 0)    parts.push(`${famKg.toFixed(1)} ק"ג בצק`);
+      if(famUnits > 0) parts.push(`${famUnits} יח'`);
+      line += parts.join(' → ');
+      famLines.push(line);
+    }
+  });
+
+  if(!anyData){
+    sumEl.innerHTML = 'מלא מה הכנת היום';
+    btn.disabled = true;
+  } else {
+    sumEl.innerHTML = famLines.join(' &nbsp;|&nbsp; ');
+    btn.disabled = false;
+  }
+}
+
+// ── SUBMIT ──
+document.getElementById('submit-btn').addEventListener('click', async ()=>{
+  var _sb = document.getElementById('submit-btn');
+  if(_sb.dataset.sending === '1') return;
+  _sb.dataset.sending = '1'; _sb.disabled = true;
+  showLoading(true);
+  const ok = await submitReport();
+  _sb.dataset.sending = '0';
+  showLoading(false);
+
+  if(ok){
+    saveTodayReport(new Date().toISOString());
+    // Build per-family summary for done screen
+    const famSummaries = [];
+    activeFamilies.forEach(fam=>{
+      const famKg    = fam.doughs.reduce((s,d)=>s+(doughKg[d.id]||0),0);
+      const famProds = fam.products.filter(n=>productQty[n]>0);
+      const famUnits = famProds.reduce((s,n)=>s+(productQty[n]||0),0);
+      if(famKg>0||famUnits>0){
+        famSummaries.push({fam, famKg, famProds, famUnits});
+      }
+    });
+
+    document.getElementById('done-sub').textContent = workerName+' · '+isoDate();
+    document.getElementById('done-list').innerHTML = famSummaries.map(({fam,famKg,famProds,famUnits})=>`
+      <div class="done-item" style="flex-direction:column;align-items:flex-end;gap:3px;">
+        <div style="font-weight:800;font-size:14px;">${fam.name}</div>
+        ${famKg>0?`<div style="font-size:12px;opacity:.8;">${famKg.toFixed(1)} ק"ג בצק${fam.doughs.some(d=>doughUnits[d.id]>0)?' · '+fam.doughs.reduce((s,d)=>s+(doughUnits[d.id]||0),0)+' יח\' בצק':''}</div>`:''}
+        ${famProds.map(n=>`<div style="font-size:12px;opacity:.8;">${n}: ${productQty[n]} יח'</div>`).join('')}
+      </div>`).join('');
+
+    showScreen('screen-done');
+  } else {
+    alert('שגיאה בשליחה — נסה שוב');
+  }
+});
+
+document.getElementById('btn-again').addEventListener('click', ()=>{
+  initMain();
+  showScreen('screen-main');
+});
+
+// ── ADD PRODUCT MODAL ──
+
+
+// ── REMOVE REQUESTS ──
+async function requestRemove(type, famId, name){
+  var code = prompt('הזן קוד אישור להסרה:');
+  if(code === null) return; // cancelled
+  if(code.trim() !== '2010'){
+    showToast('קוד שגוי');
+    return;
+  }
+  // Code correct — execute immediately
+  var fam = activeFamilies.find(f=>f.id===famId);
+  if(!fam) return;
+  if(type === 'remove_family'){
+    activeFamilies = activeFamilies.filter(f=>f.id!==famId);
+  } else if(type === 'remove_product'){
+    fam.products = fam.products.filter(p=>p!==name);
+  }
+  await saveBakerFamilies(activeFamilies);
+  showToast('✓ הוסר בהצלחה');
+  renderContent();
+}
+
+function showToast(msg){
+  var existing = document.getElementById('baker-toast');
+  if(existing) existing.remove();
+  var t = document.createElement('div');
+  t.id = 'baker-toast';
+  t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;white-space:nowrap;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+function showAddFamilyModal(){
+  var existing = document.getElementById('add-fam-modal');
+  if(existing) existing.remove();
+  var el = document.createElement('div');
+  el.id = 'add-fam-modal';
+  el.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;';
+  el.innerHTML = `
+    <div style="background:#fff;width:100%;border-radius:18px 18px 0 0;padding:22px 18px 36px;direction:rtl;max-height:90vh;overflow-y:auto;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">קטגוריה חדשה</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:16px;">הגדר שם, בצקים ומוצרים ראשוניים</div>
+
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">שם קטגוריה</div>
+      <input id="new-fam-name" type="text" placeholder="לדוגמה: מוסים, פרלינים..."
+        style="width:100%;border:2px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:15px;margin-bottom:14px;direction:rtl;font-family:inherit;box-sizing:border-box;">
+
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">בצקים / מנות</div>
+      <div id="new-fam-doughs" style="margin-bottom:8px;"></div>
+      <button onclick="addDoughRow()"
+        style="width:100%;background:#f5f3ff;color:#7c3aed;border:1px dashed #ddd6fe;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;">
+        + הוסף בצק / מנה
+      </button>
+
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">מוצרים ראשוניים</div>
+      <div id="new-fam-products" style="margin-bottom:8px;"></div>
+      <button onclick="addProductRow()"
+        style="width:100%;background:#eff6ff;color:#2563eb;border:1px dashed #93c5fd;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:18px;">
+        + הוסף מוצר
+      </button>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="doAddFamily()"
+          style="flex:1;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">
+          + צור קטגוריה
+        </button>
+        <button onclick="document.getElementById('add-fam-modal').remove();"
+          style="background:#f3f4f6;border:none;border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;color:#374151;">
+          ביטול
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
+  setTimeout(()=>document.getElementById('new-fam-name').focus(), 100);
+}
+
+function addDoughRow(){
+  var container = document.getElementById('new-fam-doughs');
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="שם הבצק..." class="new-dough-name"
+      style="flex:1;border:2px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;direction:rtl;font-family:inherit;">
+    <select class="new-dough-unit"
+      style="border:2px solid #e5e7eb;border-radius:10px;padding:10px 8px;font-size:13px;font-family:inherit;background:#fff;">
+      <option value="ק&quot;ג">ק"ג</option>
+      <option value="יח'">יח'</option>
+      <option value="מנה">מנה</option>
+    </select>
+    <button onclick="this.parentElement.remove()"
+      style="background:none;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:14px;padding:8px 10px;cursor:pointer;">✕</button>`;
+  container.appendChild(row);
+  row.querySelector('.new-dough-name').focus();
+}
+
+function addProductRow(){
+  var container = document.getElementById('new-fam-products');
+
+  // Build dough options from current dough rows
+  var doughNames = Array.from(document.querySelectorAll('.new-dough-name'))
+    .map(i=>i.value.trim()).filter(Boolean);
+  var doughOptions = doughNames.length
+    ? '<option value="">— לא משויך —</option>'+doughNames.map(n=>`<option value="${n}">${n}</option>`).join('')
+    : '<option value="">— לא משויך —</option>';
+
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="שם המוצר..." class="new-prod-name-row"
+      style="flex:1;border:2px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;direction:rtl;font-family:inherit;">
+    <select class="new-prod-dough-select"
+      style="border:2px solid #e5e7eb;border-radius:10px;padding:10px 8px;font-size:12px;font-family:inherit;background:#fff;max-width:110px;">
+      ${doughOptions}
+    </select>
+    <button onclick="this.parentElement.remove()"
+      style="background:none;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:14px;padding:8px 10px;cursor:pointer;">✕</button>`;
+  container.appendChild(row);
+  row.querySelector('.new-prod-name-row').focus();
+}
+
+async function doAddFamily(){
+  var inp  = document.getElementById('new-fam-name');
+  var name = (inp.value||'').trim();
+  if(!name){ inp.style.borderColor='#dc2626'; inp.focus(); return; }
+
+  // Collect doughs
+  var doughRows = document.querySelectorAll('#new-fam-doughs > div');
+  var newDoughs = [];
+  doughRows.forEach(function(row){
+    var dname = (row.querySelector('.new-dough-name').value||'').trim();
+    var dunit = row.querySelector('.new-dough-unit').value;
+    if(dname){
+      var did = 'dough_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      newDoughs.push({ id: did, name: dname, hint: '', unit: dunit });
+    }
+  });
+
+  // Collect products
+  var prodRows = document.querySelectorAll('#new-fam-products > div');
+  var newProds = [];
+  prodRows.forEach(function(row){
+    var pname = (row.querySelector('.new-prod-name-row').value||'').trim();
+    if(pname) newProds.push(pname);
+  });
+
+  var btn = document.querySelector('#add-fam-modal button[onclick="doAddFamily()"]');
+  if(btn){ btn.textContent = '⏳ שומר...'; btn.disabled = true; }
+
+  var newId  = 'fam_' + Date.now();
+  var newFam = { id: newId, name: name, icon: '', batchKg: null, maxKg: 30, doughs: newDoughs, products: newProds };
+  var updated = activeFamilies.concat([newFam]);
+  await saveBakerFamilies(updated);
+
+  // Add new products to admin state
+  for(var i=0; i<newProds.length; i++){
+    await addProductToAdminState(newProds[i]);
+  }
+
+  document.getElementById('add-fam-modal').remove();
+  renderContent();
+}
+
+function showAddProductModal(famId){
+  var existing = document.getElementById('add-prod-modal');
+  if(existing) existing.remove();
+
+  var fam = activeFamilies.find(f=>f.id===famId);
+  if(!fam) return;
+
+  var available = (allProducts||[])
+    .map(p=>p.name)
+    .filter(n=> n && !fam.products.includes(n));
+
+  var listHTML = available.length
+    ? available.map(n=>`
+        <div onclick="pickExistingProduct('${famId}','${n.replace(/'/g,"\'")}',this)"
+          style="padding:11px 14px;border:2px solid #e5e7eb;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;margin-bottom:8px;transition:all .15s;"
+          onmouseover="this.style.borderColor='#2563eb';this.style.background='#eff6ff'"
+          onmouseout="this.style.borderColor='#e5e7eb';this.style.background=''">
+          ${n}
+        </div>`).join('')
+    : '<div style="color:#9ca3af;font-size:13px;padding:8px 0;">כל המוצרים כבר בקטגוריה</div>';
+
+  // Dough options for this family
+  var doughOptions = fam.doughs.length
+    ? '<option value="">— לא משויך —</option>'+fam.doughs.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')
+    : '<option value="">— אין בצקים בקטגוריה —</option>';
+
+  var el = document.createElement('div');
+  el.id = 'add-prod-modal';
+  el.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;';
+  el.innerHTML = `
+    <div style="background:#fff;width:100%;border-radius:18px 18px 0 0;padding:22px 18px 36px;direction:rtl;max-height:85vh;overflow-y:auto;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">הוסף מוצר ל${fam.name}</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:14px;">בחר מוצר קיים או הוסף חדש</div>
+
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;">מוצרים מהמערכת:</div>
+      ${listHTML}
+
+      <div style="border-top:1px solid #e5e7eb;margin:14px 0 10px;"></div>
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;">מוצר חדש:</div>
+      <input id="new-prod-name" type="text" placeholder="שם המוצר החדש..."
+        style="width:100%;border:2px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-size:15px;margin-bottom:10px;direction:rtl;font-family:inherit;box-sizing:border-box;">
+      ${fam.doughs.length ? `
+      <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">שיוך לבצק (אופציונלי)</div>
+      <select id="new-prod-dough"
+        style="width:100%;border:2px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;font-family:inherit;background:#fff;margin-bottom:12px;">
+        ${doughOptions}
+      </select>` : ''}
+      <div style="display:flex;gap:10px;">
+        <button onclick="doAddProduct('${famId}')"
+          style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">
+          + הוסף חדש
+        </button>
+        <button onclick="document.getElementById('add-prod-modal').remove();"
+          style="background:#f3f4f6;border:none;border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;color:#374151;">
+          ביטול
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
+}
+
+async function pickExistingProduct(famId, name, el){
+  el.style.background='#dbeafe'; el.style.borderColor='#2563eb';
+  await addProductToFamily(famId, name);
+  document.getElementById('add-prod-modal').remove();
+  renderContent();
+}
+
+async function doAddProduct(famId){
+  var inp  = document.getElementById('new-prod-name');
+  var name = (inp.value||'').trim();
+  if(!name){ inp.style.borderColor='#dc2626'; inp.focus(); return; }
+
+  var modal = document.getElementById('add-prod-modal');
+  var btn   = modal.querySelectorAll('button')[0];
+  btn.textContent = '⏳ שומר...'; btn.disabled = true;
+
+  // Add to family
+  await addProductToFamily(famId, name);
+
+  // Also save to admin state.products if not exists
+  await addProductToAdminState(name);
+
+  modal.remove();
+  renderContent();
+}
+
+async function addProductToAdminState(name){
+  try {
+    const res  = await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main&select=data',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const rows = await res.json();
+    if(!rows||!rows[0]) return;
+    const data = rows[0].data;
+    if(!Array.isArray(data.products)) data.products = [];
+    if(data.products.some(p=>p.name===name)) return; // already exists
+    var newId = Date.now();
+    data.products.push({
+      id: newId, name: name, category: 'אחר',
+      stock:0, shelfStock:0, baseStock:0,
+      minStock:3, dailyBurn:5, type:'fresh', eodTrack:true
+    });
+    allProducts = data.products;
+    await fetch(SB_URL+'/rest/v1/condit_state?id=eq.main',{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({data})
+    });
+  } catch(e){ console.error(e); }
+}
+
+// ── HISTORY ──
+let todayReports = []; // loaded from supabase
+
+async function loadTodayReports(){
+  try{
+    var today     = isoDate();
+    var yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    var name      = encodeURIComponent(workerName);
+    var res = await fetch(
+      SB_URL+'/rest/v1/condit_productions?worker=eq.'+name+'&date=in.('+today+','+yesterday+')&select=id,date,submitted_at,entries&order=submitted_at.desc',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}
+    );
+    var rows = await res.json();
+    todayReports = Array.isArray(rows) ? rows : [];
+  }catch(e){ todayReports = []; }
+}
+
+function getProductReportedQtyToday(productName){
+  var today = isoDate();
+  var total = 0;
+  todayReports.filter(r=>r.date===today).forEach(r=>{
+    (r.entries||[]).forEach(e=>{
+      if(e.type==='product' && e.name===productName) total += Number(e.qty||0);
+    });
+  });
+  return total;
+}
+
+function renderHistoryTab(){
+  var today     = isoDate();
+  var yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+
+  if(!todayReports.length){
+    return '<div style="padding:24px;text-align:center;color:#9ca3af;font-size:14px;">אין דוחות להצגה</div>';
+  }
+
+  var html = '';
+  [today, yesterday].forEach(function(date){
+    var dayReports = todayReports.filter(r=>r.date===date);
+    if(!dayReports.length) return;
+    html += `<div style="font-size:11px;font-weight:700;color:#6b7688;padding:10px 14px 4px;">${date===today?'היום':'אתמול'} — ${dayReports.length} דיווח${dayReports.length>1?'ים':''}</div>`;
+    dayReports.forEach(function(r){
+      var t = new Date(r.submitted_at);
+      var hhmm = t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+      var prods = (r.entries||[]).filter(e=>e.type==='product');
+      var doughs = (r.entries||[]).filter(e=>e.type==='dough');
+      html += `<div style="background:#fff;border:1px solid #e4e8ee;border-radius:13px;margin:6px 12px;padding:12px 14px;">
+        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">🕐 ${hhmm}</div>`;
+      if(doughs.length){
+        html += `<div style="font-size:11px;color:#6b7688;margin-bottom:4px;">`+doughs.map(d=>`${d.name}: ${d.qty} ק"ג${d.doughUnits?' · '+d.doughUnits+' יח\'':''}`).join(' | ')+`</div>`;
+      }
+      html += prods.map(p=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0;"><span>${p.name}</span><span style="font-weight:700;">${p.qty} יח'</span></div>`).join('');
+      html += `</div>`;
+    });
+  });
+  return html;
+}
+
+function showHistoryScreen(){
+  var el = document.getElementById('screen-history');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'screen-history';
+    el.className = 'screen';
+    el.innerHTML = `
+      <div class="top-bar">
+        <div class="top-row">
+          <span id="history-title" style="font-size:17px;font-weight:800;">היסטוריה</span>
+          <span onclick="showScreen('screen-main')" style="font-size:13px;color:var(--primary);cursor:pointer;font-weight:600;">חזרה ›</span>
+        </div>
+      </div>
+      <div id="history-content" style="flex:1;overflow-y:auto;padding-bottom:40px;"></div>`;
+    document.body.appendChild(el);
+  }
+  document.getElementById('history-title').textContent = 'היסטוריה — '+workerName;
+  document.getElementById('history-content').innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;">טוען...</div>';
+  showScreen('screen-history');
+  loadTodayReports().then(function(){
+    document.getElementById('history-content').innerHTML = renderHistoryTab();
+  });
+}
+
+// ── SUBMIT: add update log ID ──
+function submitLogId(){
+  var now  = new Date();
+  var dd   = now.toISOString().slice(2,10).replace(/-/g,'');
+  var hhmm = now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0');
+  var name = (workerName||'unknown').replace(/\s+/g,'_').slice(0,10);
+  return 'BAKER-'+dd+'-'+name+'-'+hhmm;
+}
+</script>
+</body>
+</html>
